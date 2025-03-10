@@ -1,1 +1,1 @@
-# english-app
+# Ứng dụng quản lý từ vựng Tiếng Anh

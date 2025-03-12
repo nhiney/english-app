@@ -1,5 +1,5 @@
 # Xây dựng ứng dụng quản lý từ vựng tiếng Anh
-
+(dùng thư viên Tkinter để làm bài)
 ## Chức năng chính
 - Ứng dụng cho phép **quản trị viên** quản lý (CRUD) tài khoản và phân quyền người dùng.
 - **Người dùng** có thể xem, tìm kiếm, lưu từ vựng và tải từ vựng đã lưu về máy.

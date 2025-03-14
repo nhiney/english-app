@@ -1,0 +1,84 @@
+Công việc 1: Đăng nhập, quản lý tài khoản, phân quyền, chỉnh sửa hồ sơ cá nhân. (Thanh Vy)
+
+1. Màn hình Đăng nhập
+   - Ô nhập Email/Username
+   - Ô nhập Mật khẩu
+   - Nút Đăng nhập (mã hóa mật khẩu trước khi gửi lên server)
+   - Hiển thị thông báo lỗi nếu sai tài khoản/mật khẩu
+   - Nút Đăng ký tài khoản mới (dẫn đến màn hình đăng ký)
+
+2. Màn hình Quản lý tài khoản (User Management) - Chỉ dành cho Admin
+   - Danh sách tài khoản người dùng
+   - Nút Thêm tài khoản mới
+   - Nút Chỉnh sửa/Xóa tài khoản (hiển thị xác nhận trước khi xóa)
+   - Tùy chọn phân quyền (Admin/User)
+   - Tìm kiếm tài khoản
+
+3. Màn hình Chỉnh sửa phân quyền
+   - Danh sách người dùng
+   - Tùy chọn Cấp quyền (Admin/User)
+   - Nút Lưu thay đổi
+
+4. Màn hình Hồ sơ cá nhân (User Profile)
+   - Hiển thị Tên, Email, Ảnh đại diện
+   - Nút Chỉnh sửa thông tin cá nhân
+   - Nút Đăng xuất
+
+5. Màn hình Thêm/Sửa/Xóa tài khoản
+   - Thêm người dùng với thông tin họ tên, email, mật khẩu
+   - Chỉnh sửa thông tin tài khoản
+   - Xóa tài khoản (hiển thị xác nhận trước khi xóa)
+
+---------------------------------------------------------------------------------------------
+
+Công việc 2: Đăng ký, quản lý từ vựng, nhập/xuất từ vựng, xem chi tiết từ vựng. (Yến Nhi)
+
+1. Màn hình Đăng ký
+   - Ô nhập Họ và tên (kiểm tra hợp lệ)
+   - Ô nhập Email (kiểm tra hợp lệ)
+   - Ô nhập Mật khẩu (ít nhất 8 ký tự, chữ hoa, chữ thường, số, ký tự đặc biệt)
+   - Ô nhập Xác nhận mật khẩu
+   - Nút Đăng ký (xác nhận dữ liệu đầu vào hợp lệ trước khi gửi)
+   - Nút Quay lại đăng nhập
+   - Hiển thị thông báo lỗi nếu nhập sai hoặc thiếu thông tin
+
+2. Màn hình Trang chủ (Dashboard)
+   - Thanh Menu điều hướng (Dashboard, Từ vựng, Quản lý tài khoản, Đăng xuất)
+   - Thống kê số lượng từ vựng đã lưu, số lượng người dùng và quản trị viên
+   - Tìm kiếm từ vựng
+   - Danh sách từ vựng
+   - Nút Thêm từ vựng mới (chỉ dành cho quản trị viên)
+   - Phân quyền: Người dùng bị giới hạn một số tính năng
+
+3. Màn hình Quản lý từ vựng
+   - Danh sách từ vựng đã lưu
+   - Ô tìm kiếm từ vựng
+   - Bộ lọc theo từ loại, trường từ vựng,...
+   - Nút Thêm từ vựng mới (chỉ dành cho quản trị viên)
+   - Nút Chỉnh sửa/Xóa từ vựng (hiển thị thông báo xác nhận trước và sau khi chỉnh sửa/xóa)
+   - Nút Nhập từ file JSON (kiểm tra cấu trúc file trước khi nhập)
+   - Nút Xuất từ vựng ra file
+
+4. Màn hình Thêm/Sửa từ vựng
+   - Ô nhập Từ vựng
+   - Ô nhập Nghĩa của từ
+   - Ô nhập Loại từ (danh từ, động từ, tính từ,...)
+   - Ô nhập Ví dụ sử dụng (câu mẫu, cụm từ)
+   - Nút Lưu lại (kiểm tra hợp lệ trước khi lưu)
+   - Nút Hủy (hiển thị xác nhận trước khi hủy)
+
+5. Màn hình Nhập từ vựng từ file JSON
+   - Chọn file JSON (kiểm tra dữ liệu trước khi nhập)
+   - Hiển thị danh sách từ vựng trong file JSON
+   - Nút Nhập dữ liệu
+   - Nút Hủy (hiển thị thông báo xác nhận)
+
+6. Màn hình Tải từ vựng về máy (Export)
+   - Xuất từ vựng ra file JSON, hỗ trợ PDF, TXT, CSV nếu có thời gian
+   - Nút Tải xuống (hiển thị hộp thoại chọn nơi lưu, thông báo sau khi tải xong)
+   - Nút Back (quay lại màn hình trước đó)
+
+7. Màn hình Chi tiết từ vựng
+   - Hiển thị từ vựng, nghĩa, loại từ, ví dụ sử dụng
+   - Tùy chọn lưu từ vựng vào danh sách cá nhân
+

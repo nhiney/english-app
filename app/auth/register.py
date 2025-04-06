@@ -1,103 +1,84 @@
-from tkinter import *
+import tkinter as tk
 from tkinter import messagebox
-import os
-import ast
+import re
 
-# Tạo cửa sổ chính
-window=Tk()
-window. title('Login')
-window.geometry('925x500+300+200')
-window. configure(bg="#fff")
-window.resizable(False,False)
+def validate_input(username, password, confirm_password):
+    if len(username) < 3 or username.isdigit():
+        return "Tên người dùng không hợp lệ!"
+    
+    if password != confirm_password:
+        return "Mật khẩu xác nhận không khớp!"
+    
+    # Mật khẩu mạnh: ít nhất 8 ký tự, có hoa, thường, số, đặc biệt
+    if len(password) < 8 or \
+       not re.search(r'[A-Z]', password) or \
+       not re.search(r'[a-z]', password) or \
+       not re.search(r'\d', password) or \
+       not re.search(r'[\W_]', password):
+        return "Mật khẩu yếu! Cần ít nhất 8 ký tự gồm hoa, thường, số, ký tự đặc biệt."
+    
+    return None
 
-def signup():
-    username=user.get()
-    password=code.get()
-    confirm_password=confirm_code.get()
-    if password==confirm_password:
-        try:
-            file=open('datasheet.txt','r+')
-            d=file.read()
-            r=ast.literal_eval(d)
+class RegisterWindow:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Sign Up")
+        self.root.geometry("800x400")
+        self.root.configure(bg='white')
 
-            dict2={username:password}
-            r.update(dict2)
-            file.truncate(0)
-            file.close()
+        # Khung trái: ảnh/logo
+        left_frame = tk.Frame(self.root, bg='white')
+        left_frame.pack(side="left", fill="both", expand=True)
 
-            file=open('datasheet.txt','w')
-            w=file.write(str(r))
-            messagebox.showinfo('Signup','Sucessfully sign up')
-        except:
-            file=open('datasheet.txt','w')
-            pp=str({'Username':'password'})
-            file.write(pp)
-            file.close()
-    else:
-        messagebox.showerror('Invalid',"both password should match")
-        
-# Tính đường dẫn đến image
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-image_path = os.path.join(BASE_DIR, 'login.png')
+        logo = tk.PhotoImage(file="D:/Python/english-app/app/auth/login.png")  # Đảm bảo rằng đường dẫn ảnh đúng
+        img_label = tk.Label(left_frame, image=logo, bg="white")
+        img_label.image = logo  # Giữ tham chiếu để tránh mất ảnh
+        img_label.pack(padx=20, pady=60)
 
-# Load ảnh
-img=PhotoImage(file=image_path)
-Label(window,image=img,bg='white').place(x=50,y=50)
+        # Khung phải: Form đăng ký
+        right_frame = tk.Frame(self.root, bg="white")
+        right_frame.pack(side="right", fill="both", expand=True, padx=30)
 
-# Tạo khung nhập
-frame=Frame(window,width=500, height=390,bg="#fff")
-frame.place (x=480,y=50)
+        tk.Label(right_frame, text="Sign up", font=("Helvetica", 20), fg="dodgerblue", bg="white").pack(pady=10)
 
-heading=Label(frame,text='Sign up',fg='#57a1f8',bg='white',font=('Microsoft Yahei UI Light',23,'bold'))
-heading.place(x=100,y=5)
-###-----------------------------------------------------------------------------------------------
-def on_enter(e):
-    user.delete(0,'end')
-def on_leave(e):
-    name=user.get()
-    if name=='':
-        user.insert(0,'Username')
-# ô nhập username
-user=Entry(frame,width=25,fg='black',border=0,bg="white",font=('Microsoft Yahei UI Light',11))
-user.place(x=30,y=80)
-user.insert(0,'Username')
-user.bind('<FocusIn>',on_enter)
-user.bind('<FocusOut>',on_leave)
-Frame(frame,width=295,height=2,bg='black').place(x=25,y=107)
+        self.username_entry = self._create_entry(right_frame, "Username")
+        self.password_entry = self._create_entry(right_frame, "Password", show='*')
+        self.confirm_entry = self._create_entry(right_frame, "Confirm Password", show='*')
 
-####--------------------------------------------------------------------------------------
-def on_enter(e):
-    code.delete(0,'end')
-def on_leave(e):
-    name=code.get()
-    if name=='':
-        code.insert(0,'Password')
-code=Entry(frame,width=25,fg='black',border=0,bg="white",font=('Microsoft Yahei UI Light',11))
-code.place(x=30,y=150)
-code.insert(0,'Password')
-code.bind('<FocusIn>',on_enter)
-code.bind('<FocusOut>',on_leave)
-Frame(frame,width=295,height=2,bg='black').place(x=25,y=177)
-####--------------------------------------------------------------------------------------
-def on_enter(e):
-    confirm_code.delete(0,'end')
-def on_leave(e):
-    if  confirm_code.get()=='':
-         confirm_code.insert(0,'Confirm password')
-confirm_code=Entry(frame,width=25,fg='black',border=0,bg="white",font=('Microsoft Yahei UI Light',11))
-confirm_code.place(x=30,y=220)
-confirm_code.insert(0,'Confirm Password')
-confirm_code.bind('<FocusIn>',on_enter)
-confirm_code.bind('<FocusOut>',on_leave)
-Frame(frame,width=295,height=2,bg='black').place(x=25,y=247)
+        self.signup_btn = tk.Button(right_frame, text="Sign up", bg="dodgerblue", fg="white", height=2, command=self.signup)
+        self.signup_btn.pack(fill="x", pady=(15, 10))
 
-###############################################################################################
+        tk.Label(right_frame, text="I have an account", bg="white").pack()
+        tk.Button(right_frame, text="Sign in", fg="dodgerblue", bg="white", bd=0, command=self.go_to_login).pack()
 
-Button(frame,width=39,pady=7,text='Sign up',bg='#57a1f8',fg='white',border=0,command=signup).place(x=35,y=280)
-label=Label(frame,text="I have an account",fg='black',bg='white',font=('Microsoft Yahei UI Light',9))
-label.place(x=90,y=340)
+    def _create_entry(self, parent, label_text, show=None):
+        tk.Label(parent, text=label_text, bg="white", anchor='w').pack(fill="x", pady=(5,0))
+        entry = tk.Entry(parent, bd=1, relief="solid", show=show)
+        entry.pack(fill="x", pady=(0, 5))
+        return entry
 
-signin=Button(frame,width=6,text='Sign in',border=0,bg='white',cursor='hand2',fg='#57a1f8')
-signin.place(x=200,y=340)
+    def signup(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+        confirm = self.confirm_entry.get()
 
-window.mainloop()
+        error = validate_input(username, password, confirm)
+        if error:
+            messagebox.showerror("Lỗi", error)
+        else:
+            messagebox.showinfo("Thành công", "Đăng ký thành công!")
+            self.root.destroy()
+            open_login_window()
+
+    def go_to_login(self):
+        self.root.destroy()
+        open_login_window()
+
+def open_login_window():
+    import login  # Giả sử login.py là module trong cùng một thư mục
+    login.open_window()  # Chỉ gọi hàm open_window() để mở cửa sổ đăng nhập
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = RegisterWindow(root)
+    root.mainloop()

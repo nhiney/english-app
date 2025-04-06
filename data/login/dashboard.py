@@ -6,7 +6,7 @@ import os
 class VocabularyApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Ứng dụng Từ vựng Tiếng Anh")
+        self.root.title("English App")
         self.root.geometry("800x600")
         
         # Khởi tạo file dữ liệu

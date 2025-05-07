@@ -1,95 +1,172 @@
-from tkinter import *
-from tkinter import messagebox
+import tkinter as tk
+from tkinter import messagebox, ttk
+from utils.hash_utils import hash_password
+from utils.database import load_database
+from common.configs import WINDOW_SIZE
+from common.base_window import BaseWindow
+from PIL import Image, ImageTk
 import os
 import sys
 
-# Tạo cửa sổ chính
-root = Tk()
-root.title('Login')
-root.geometry('925x500+300+200')
-root.configure(bg="#fff")
-root.resizable(False, False)
 
-def signin():
-    username = user.get()
-    password = code.get()
+class LoginWindow(BaseWindow):
+    def __init__(self, root):
+        super().__init__(root, "Login", WINDOW_SIZE['WIDTH'], WINDOW_SIZE['HEIGHT'])
+        self.root = root
+        self.root.title("Đăng nhập")
+        self.root.configure(bg='white')
 
-    if username == 'admin' and password == '1234':
-        screen = Toplevel(root)
-        screen.title("App")
-        screen.geometry('925x500+300+200')
-        screen.config(bg="white")
+        # Khởi tạo màn hình ở vị trí giữa cửa sổ
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = int((screen_width / 2) - (WINDOW_SIZE['WIDTH'] / 2))
+        y = int((screen_height / 2) - (WINDOW_SIZE['HEIGHT'] / 2))
+        self.root.geometry(f"{WINDOW_SIZE['WIDTH']}x{WINDOW_SIZE['HEIGHT']}+{x}+{y}")
 
-        Label(screen, text='Hello Everyone!', bg='#fff', font=('Calibri(Body)', 50, 'bold')).pack(expand=True)
-        screen.mainloop()
-    elif username != 'admin' and password != '1234':
-        messagebox.showerror("Invalid", "Invalid username and password")
-    elif password != "1234":
-        messagebox.showerror("Invalid", "Invalid password")
-    elif username != 'admin':
-        messagebox.showerror("Invalid", "Invalid username")
+        # Load image
+        if getattr(sys, 'frozen', False):
+            # Running as compiled executable
+            base_path = os.path.join(sys._MEIPASS, 'app')
+        else:
+            # Running as script
+            base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
+        image_path = os.path.join(base_path, "assets", "auth2.webp")
+        
+        if not os.path.exists(image_path):
+            raise FileNotFoundError(f"Image not found at: {image_path}")
 
-# Tính đường dẫn đến image
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-image_path = os.path.join(BASE_DIR, 'login.png')
+        # Left frame cho ảnh
+        self.left_frame = tk.Frame(root, width=(WINDOW_SIZE['WIDTH'] / 3 * 2), height=WINDOW_SIZE['HEIGHT'],
+                                   bg='#f0f2f5')
+        self.left_frame.pack(side="left", fill="both", expand=False)
 
-# Load ảnh
-img = PhotoImage(file=image_path)
-Label(root, image=img, bg='white').place(x=50, y=50)
+        self.left_image = self.load_and_resize_image(image_path, int(WINDOW_SIZE['WIDTH'] / 3 * 2),
+                                                     WINDOW_SIZE['HEIGHT'])
 
-# Tạo khung nhập
-frame = Frame(root, width=500, height=500, bg="white")
-frame.place(x=480, y=70)
-heading = Label(frame, text='Sign in', fg='#57a1f8', bg='white', font=('Microsoft Yahei UI Light', 23, 'bold'))
-heading.place(x=100, y=5)
+        self.image_label = tk.Label(self.left_frame, image=self.left_image, bg='#f0f2f5')
+        self.image_label.place(relx=0.5, rely=0.5, anchor="center")
 
-def on_enter(e):
-    user.delete(0, 'end')
+        # Right frame for login form
+        self.right_frame = tk.Frame(root, bg="white")
+        self.right_frame.pack(side="right", fill="both", expand=True, padx=40)
 
-def on_leave(e):
-    name = user.get()
-    if name == '':
-        user.insert(0, 'Username')
+        # Create login form
+        self.create_login_form()
 
-# ô nhập username
-user = Entry(frame, width=25, fg='black', border=0, bg="white", font=('Microsoft Yahei UI Light', 11))
-user.place(x=30, y=80)
-user.insert(0, 'Username')
-user.bind('<FocusIn>', on_enter)
-user.bind('<FocusOut>', on_leave)
-Frame(frame, width=295, height=2, bg='black').place(x=25, y=107)
+    def load_and_resize_image(self, path, frame_width, frame_height):
+        """Tải và resize ảnh theo đúng tỉ lệ để fit vào khung"""
+        image = Image.open(path)
 
-def on_enter(e):
-    code.delete(0, 'end')
+        img_ratio = image.width / image.height
+        frame_ratio = frame_width / frame_height
 
-def on_leave(e):
-    name = code.get()
-    if name == '':
-        code.insert(0, 'Password')
+        if img_ratio > frame_ratio:
+            # Fit theo chiều rộng
+            new_width = frame_width
+            new_height = int(frame_width / img_ratio)
+        else:
+            # Fit theo chiều cao
+            new_height = frame_height
+            new_width = int(frame_height * img_ratio)
 
-# ô nhập password
-code = Entry(frame, width=25, fg='black', border=0, bg="white", font=('Microsoft Yahei UI Light', 11))
-code.place(x=30, y=150)
-code.insert(0, 'Password')
-code.bind('<FocusIn>', on_enter)
-code.bind('<FocusOut>', on_leave)
-Frame(frame, width=295, height=2, bg='black').place(x=25, y=177)
+        resized = image.resize((new_width, new_height), Image.LANCZOS)
+        return ImageTk.PhotoImage(resized)
 
-Button(frame, width=39, pady=7, text='Sign in', bg='#57a1f8', fg='white', border=0, command=signin).place(x=35, y=204)
+    def create_login_form(self):
+        """Tạo biểu mẫu đăng nhập"""
+        # Title for the app
+        title_label = tk.Label(self.right_frame, 
+                             text="English Learning", 
+                             font=("Helvetica", 28, "bold"), 
+                             fg="#1a73e8",
+                             bg="white")
+        title_label.pack(pady=(40, 20))
 
-label = Label(frame, text="Don't have an account?", fg='black', bg='white', font=('Microsoft Yahei UI Light', 9))
-label.place(x=75, y=270)
+        # Welcome text
+        welcome_label = tk.Label(self.right_frame,
+                               text="Welcome back!",
+                               font=("Helvetica", 16),
+                               fg="#5f6368",
+                               bg="white")
+        welcome_label.pack(pady=(0, 30))
 
-# Nút Sign up
-sign_up = Button(frame, width=6, text='Sign up', border=0, bg='white', cursor='hand2', fg='#57a1f8', command=lambda: go_to_register())
-sign_up.place(x=215, y=270)
+        # Email field
+        email_frame = tk.Frame(self.right_frame, bg="white")
+        email_frame.pack(fill="x", pady=5)
+        tk.Label(email_frame, 
+                text="Email", 
+                font=("Helvetica", 12),
+                fg="#5f6368",
+                bg="white").pack(anchor="w")
+        self.entry_email = ttk.Entry(email_frame, width=40)
+        self.entry_email.pack(pady=(5, 15))
 
-def go_to_register():
-    root.destroy()  # Đóng cửa sổ đăng nhập
-    open_register_window()  # Mở cửa sổ đăng ký
+        # Password field
+        password_frame = tk.Frame(self.right_frame, bg="white")
+        password_frame.pack(fill="x", pady=5)
+        tk.Label(password_frame, 
+                text="Password", 
+                font=("Helvetica", 12),
+                fg="#5f6368",
+                bg="white").pack(anchor="w")
+        self.entry_password = ttk.Entry(password_frame, show="•", width=40)
+        self.entry_password.pack(pady=(5, 20))
 
-def open_register_window():
-    import register  # Import file register.py từ thư mục đã thêm vào sys.path
-    register.open_window()  # Gọi hàm open_window() trong register.py để mở cửa sổ đăng ký
+        # Login button
+        self.btn_login = tk.Button(self.right_frame, 
+                                 text="Đăng nhập", 
+                                 command=self.login,
+                                 font=("Helvetica", 12),
+                                 bg="#1a73e8",
+                                 fg="white",
+                                 relief="flat",
+                                 padx=20,
+                                 pady=10,
+                                 cursor="hand2")
+        self.btn_login.pack(pady=10)
+        self.btn_login.bind("<Enter>", lambda e: self.btn_login.configure(bg="#1557b0"))
+        self.btn_login.bind("<Leave>", lambda e: self.btn_login.configure(bg="#1a73e8"))
 
-root.mainloop()
+        # Register button
+        self.btn_register = tk.Button(self.right_frame, 
+                                    text="Đăng ký tài khoản mới", 
+                                    command=self.open_register_window,
+                                    font=("Helvetica", 12),
+                                    bg="white",
+                                    fg="#1a73e8",
+                                    relief="flat",
+                                    cursor="hand2")
+        self.btn_register.pack(pady=10)
+        self.btn_register.bind("<Enter>", lambda e: self.btn_register.configure(fg="#1557b0"))
+        self.btn_register.bind("<Leave>", lambda e: self.btn_register.configure(fg="#1a73e8"))
+
+    def login(self):
+        """Xử lý đăng nhập."""
+        email = self.entry_email.get().strip()
+        password = self.entry_password.get().strip()
+
+        database = load_database()
+
+        for user in database["users"]:
+            if user["email"] == email and user["password"] == hash_password(password):
+                messagebox.showinfo("Thành công", "Đăng nhập thành công!")
+                self.root.destroy()
+                new_root = tk.Tk()
+
+                """ Mở giao diện trang chủ """
+                from home.dashboard import DashboardWindow
+                DashboardWindow(new_root, user)
+                new_root.mainloop()
+
+                return
+
+        messagebox.showerror("Lỗi", "Email hoặc mật khẩu không đúng!")
+
+    def open_register_window(self):
+        """Open register window"""
+        self.root.destroy()
+        from auth.register import RegisterWindow
+        root = tk.Tk()
+        app = RegisterWindow(root)
+        root.mainloop()

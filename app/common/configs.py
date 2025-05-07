@@ -1,0 +1,4 @@
+WINDOW_SIZE = {
+    "WIDTH": 1368,
+    "HEIGHT": 768,
+}

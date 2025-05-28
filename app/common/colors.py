@@ -8,4 +8,6 @@ COLORS = {
     "warning": "#E74C3C",
     "success": "#2ECC71",
     "info": "#3498DB",
+    "light": "#f0f0f0",
+
 }

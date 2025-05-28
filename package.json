@@ -1,0 +1,24 @@
+{
+  "name": "english-app",
+  "version": "1.0.0",
+  "description": "```tree\r project_root/\r │── app/\r │   │── main.py                     # Điểm khởi chạy ứng dụng\r │   │── config.py                    # Cấu hình chung của ứng dụng\r │   │── auth/                         \r │   │   │── login.py                  # Xử lý đăng nhập\r │   │   │── register.py               # Xử lý đăng ký\r │   │   │── auth_utils.py             # Hàm tiện ích cho xác thực người dùng\r │   │\r │   │── models/                       \r │   │   │── user_model.py             # Định nghĩa model User\r │   │   │── vocabulary_model.py       # Định nghĩa model Vocabulary\r │   │\r │   │── views/                        \r │   │   │── login_view.py             # Giao diện đăng nhập\r │   │   │── register_view.py          # Giao diện đăng ký\r │   │   │── dashboard_view.py         # Giao diện trang chủ\r │   │   │── vocabulary_view.py        # Giao diện danh sách từ vựng\r │   │   │── user_management_view.py   # Giao diện quản lý tài khoản\r │   │   │── profile_view.py           # Giao diện hồ sơ cá nhân\r │   │\r │   │── controllers/                  \r │   │   │── user_controller.py        # Xử lý logic tài khoản\r │   │   │── vocabulary_controller.py  # Xử lý logic từ vựng\r │   │   │── permission_controller.py  # Xử lý phân quyền\r │   │\r │   │── utils/                        \r │   │   │── validators.py             # Xác thực dữ liệu đầu vào\r │   │   │── file_handler.py           # Xử lý file nhập/xuất\r │   │   │── database.py               # Kết nối và xử lý database\r │   │\r │   │── assets/                        # Chứa tài nguyên như icon, ảnh\r │   │── data/                          # Chứa file JSON dữ liệu từ vựng\r │\r │── requirements.txt                   # Danh sách thư viện cần cài đặt\r │── README.md                          # Hướng dẫn sử dụng\r │── .gitignore                          # Các file cần bỏ qua khi đẩy lên git\r ```",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nhiney/english-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nhiney/english-app/issues"
+  },
+  "homepage": "https://github.com/nhiney/english-app#readme"
+}

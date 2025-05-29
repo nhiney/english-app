@@ -1,7 +1,8 @@
 # profile_user.py
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 from PIL import Image, ImageTk
+import os
 
 
 class Profile(tk.Frame):
@@ -14,16 +15,14 @@ class Profile(tk.Frame):
         container = tk.Frame(self, bg="white", padx=20, pady=20, bd=1, relief="solid")
         container.pack(pady=10)
 
-        try:
-            img = Image.open("assets/avatar.png")
-        except FileNotFoundError:
-            img = Image.new("RGB", (100, 100), color="gray")
+        # Tải avatar từ user hoặc mặc định
+        self.avatar_path = self.user.get("avatar", "assets/avatar.png")
+        self.avatar_image = self.load_avatar(self.avatar_path)
 
-        img = img.resize((100, 100))
-        self.avatar = ImageTk.PhotoImage(img)
-        tk.Label(container, image=self.avatar, bg="white").grid(row=0, column=0, rowspan=4, padx=10, pady=10)
+        self.avatar_label = tk.Label(container, image=self.avatar_image, bg="white", cursor="hand2")
+        self.avatar_label.grid(row=0, column=0, rowspan=4, padx=10, pady=10)
+        self.avatar_label.bind("<Button-1>", self.change_avatar)
 
-        # Gán các giá trị từ user
         name = user.get("name", "Người dùng")
         email = user.get("email", "email@example.com")
         join_date = user.get("join_date", "01/01/2024")
@@ -43,6 +42,26 @@ class Profile(tk.Frame):
         tk.Button(self, text="✏️ Chỉnh sửa hồ sơ", command=self.edit_profile,
                   bg="#4CAF50", fg="white", font=("Arial", 11, "bold"), padx=10, pady=5,
                   relief="flat").pack(pady=20)
+
+    def load_avatar(self, path):
+        try:
+            img = Image.open(path)
+        except (FileNotFoundError, OSError):
+            img = Image.new("RGB", (100, 100), color="gray")
+
+        img = img.resize((100, 100))
+        return ImageTk.PhotoImage(img)
+
+    def change_avatar(self, event=None):
+        file_path = filedialog.askopenfilename(
+            title="Chọn ảnh đại diện",
+            filetypes=[("Image files", "*.jpg *.jpeg *.png *.gif")]
+        )
+        if file_path:
+            self.avatar_image = self.load_avatar(file_path)
+            self.avatar_label.config(image=self.avatar_image)
+            self.user["avatar"] = file_path
+            messagebox.showinfo("Thành công", "Ảnh đại diện đã được cập nhật.")
 
     def edit_profile(self):
         EditProfileDialog(self, "Chỉnh sửa hồ sơ")

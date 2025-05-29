@@ -14,86 +14,66 @@ class VocabularyForm(BaseWindow):
             self.populate_fields()
 
     def create_ui(self):
-        # Main background
-        self.root.configure(bg="#f7f9fc")
+        self.root.configure(bg="#e6f0f7")
 
-        # Main frame
-        self.main_frame = tk.Frame(self.root, bg="#f7f9fc")
+        style = ttk.Style()
+        style.theme_use("clam")
+        style.configure("TLabel", background="#ffffff", foreground="#222", font=("Segoe UI", 11))
+        style.configure("TEntry", padding=10, font=("Segoe UI", 11))
+        style.configure("TButton", padding=8, font=("Segoe UI", 10, "bold"), background="#4CAF50", foreground="#fff")
+        style.configure("TCombobox", padding=10, font=("Segoe UI", 11))
+
+        self.main_frame = tk.Frame(self.root, bg="#e6f0f7")
         self.main_frame.pack(fill="both", expand=True, padx=30, pady=30)
 
-        # Title
-        title_text = "Edit Word" if self.is_edit else "Add New Word"
-        self.create_title(title_text, self.main_frame)
+        title_text = "✏️ Edit Word" if self.is_edit else "➕ Add New Word"
+        tk.Label(self.main_frame, text=title_text, font=("Segoe UI", 20, "bold"), bg="#e6f0f7", fg="#333").pack(pady=(0, 20))
 
-        # Form
-        form_frame = tk.Frame(self.main_frame, bg="#ffffff", bd=1, relief="solid")
-        form_frame.pack(fill="both", expand=True, pady=20, padx=10, ipadx=20, ipady=20)
+        form_frame = tk.Frame(self.main_frame, bg="#ffffff", bd=2, relief="groove")
+        form_frame.pack(fill="both", expand=True, padx=10, pady=10, ipadx=15, ipady=15)
 
-        # Styles
-        label_font = ("Segoe UI", 11)
-        entry_width = 42
-        field_bg = "#ffffff"
+        form_frame.columnconfigure(1, weight=1)
 
-        def create_labeled_entry(parent, text, var=None):
-            frame = tk.Frame(parent, bg=field_bg)
-            frame.pack(fill="x", pady=6)
-            tk.Label(frame, text=text, font=label_font, bg=field_bg, fg="#333").pack(side="left", padx=(0, 10))
-            entry = ttk.Entry(frame, textvariable=var, width=entry_width)
-            entry.pack(side="left", fill="x", expand=True)
+        def add_label_entry(row, label_text, var=None):
+            ttk.Label(form_frame, text=label_text).grid(row=row, column=0, sticky="w", padx=(10, 5), pady=8)
+            entry = ttk.Entry(form_frame, textvariable=var, width=40)
+            entry.grid(row=row, column=1, sticky="ew", padx=10, pady=8, ipady=6)
             return entry
 
-        def create_labeled_text(parent, text, height):
-            frame = tk.Frame(parent, bg=field_bg)
-            frame.pack(fill="x", pady=6)
-            tk.Label(frame, text=text, font=label_font, bg=field_bg, fg="#333").pack(side="left", padx=(0, 10))
-            text_widget = tk.Text(frame, height=height, width=entry_width)
-            text_widget.pack(side="left", fill="x", expand=True)
+        def add_label_text(row, label_text, height):
+            ttk.Label(form_frame, text=label_text).grid(row=row, column=0, sticky="nw", padx=(10, 5), pady=8)
+            frame = tk.Frame(form_frame, bg="#ffffff", bd=1, relief="solid")
+            frame.grid(row=row, column=1, sticky="ew", padx=10, pady=8)
+            text_widget = tk.Text(frame, height=height, width=50, wrap="word", font=("Segoe UI", 10), bd=0, padx=8, pady=6)
+            text_widget.pack(fill="both", expand=True)
             return text_widget
 
-        # Word
         self.word_var = tk.StringVar()
-        create_labeled_entry(form_frame, "Word:", self.word_var)
-
-        # Unit ID
         self.unit_var = tk.StringVar()
-        create_labeled_entry(form_frame, "Unit ID:", self.unit_var)
-
-        # Word Type
-        frame_type = tk.Frame(form_frame, bg=field_bg)
-        frame_type.pack(fill="x", pady=6)
-        tk.Label(frame_type, text="Word Type:", font=label_font, bg=field_bg, fg="#333").pack(side="left", padx=(0, 10))
         self.type_var = tk.StringVar()
-        type_combobox = ttk.Combobox(frame_type, textvariable=self.type_var,
-                                     values=["V", "N", "Adj", "Adv", "Prep", "Conj"],
-                                     state="readonly", width=entry_width - 3)
-        type_combobox.pack(side="left", fill="x", expand=True)
-        type_combobox.set("V")
-
-        # Answers
         self.answers_var = tk.StringVar()
-        create_labeled_entry(form_frame, "Answers:", self.answers_var)
 
-        # Sentences
-        self.sentences_text = create_labeled_text(form_frame, "Sentences:", height=3)
+        add_label_entry(0, "📘 Word:", self.word_var)
+        add_label_entry(1, "📦 Unit ID:", self.unit_var)
 
-        # Phrases
-        self.phrases_text = create_labeled_text(form_frame, "Phrases:", height=3)
+        ttk.Label(form_frame, text="🔤 Word Type:").grid(row=2, column=0, sticky="w", padx=(10, 5), pady=8)
+        self.type_combobox = ttk.Combobox(form_frame, textvariable=self.type_var, state="readonly",
+                                          values=["V", "N", "Adj", "Adv", "Prep", "Conj"], width=37)
+        self.type_combobox.grid(row=2, column=1, sticky="ew", padx=10, pady=8, ipady=4)
+        self.type_combobox.set("V")
 
-        # Buttons
-        button_frame = tk.Frame(form_frame, bg=field_bg)
-        button_frame.pack(pady=15)
+        add_label_entry(3, "💡 Answers (comma-separated):", self.answers_var)
+        self.sentences_text = add_label_text(4, "📝 Sentences:", 4)
+        self.phrases_text = add_label_text(5, "🔗 Phrases:", 4)
 
-        # Save button
-        save_btn = tk.Button(button_frame, text="Save", font=("Segoe UI", 10, "bold"),
-                             bg="#4CAF50", fg="white", padx=15, pady=6,
-                             command=self.save_word)
-        save_btn.pack(side="left", padx=10)
+        button_frame = tk.Frame(form_frame, bg="#ffffff")
+        button_frame.grid(row=6, column=0, columnspan=2, pady=25)
 
-        # Cancel button
-        cancel_btn = tk.Button(button_frame, text="Cancel", font=("Segoe UI", 10),
-                               bg="#dcdcdc", fg="black", padx=15, pady=6,
-                               command=self.cancel)
-        cancel_btn.pack(side="left", padx=10)
+        save_btn = ttk.Button(button_frame, text="💾 Save", command=self.save_word)
+        save_btn.pack(side="left", padx=15)
+
+        cancel_btn = ttk.Button(button_frame, text="❌ Cancel", command=self.cancel)
+        cancel_btn.pack(side="left", padx=15)
 
     def populate_fields(self):
         if not self.word_data:
@@ -154,4 +134,3 @@ class VocabularyForm(BaseWindow):
     def cancel(self):
         if messagebox.askyesno("Confirm", "Cancel without saving?"):
             self.root.destroy()
-

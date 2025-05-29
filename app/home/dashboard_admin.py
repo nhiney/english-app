@@ -1,267 +1,169 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog
+from tkinter import ttk, messagebox
+from PIL import Image, ImageTk
 import json
-from common.colors import COLORS
-from common.base_window import BaseWindow
+import os
 
-class DashboardAdmin(tk.Frame):
-    def __init__(self, parent, user):
-        super().__init__(parent, bg="white")
-        self.user = user
-        self.users_file = "data/users.json"
-        self.vocab_file = "data/vocab.json"
-        self.build_ui()
+DB_PATH = "data/database.json"
 
-    def build_ui(self):
-        sidebar = tk.Frame(self, bg=COLORS["primary"], width=250)
-        sidebar.pack(side="left", fill="y")
+class DashboardAdminWindow:
+    def __init__(self, root, user_data):
+        self.root = root
+        self.user_data = user_data
+        self.root.title("Admin Dashboard - English Vocabulary App")
+        self.root.geometry("1000x600")
+        self.root.configure(bg="#f5f7fa")
 
-        tk.Label(
-            sidebar,
-            text=f"👤 {self.user.get('name', 'Admin')}",
-            bg=COLORS["primary"],
-            fg="white",
-            font=("Helvetica", 16, "bold")
-        ).pack(pady=(30, 20))
+        self.create_header()
+        self.create_sidebar()
+        self.create_main_content()  # ✅ Tạo content_frame ở đây
+
+    # --------------------- Header ---------------------
+    def create_header(self):
+        header = tk.Frame(self.root, bg="#1a73e8", height=60)
+        header.pack(fill="x", side="top")
+
+        tk.Label(header, text="English Vocabulary - Admin", font=("Helvetica", 18, "bold"),
+                 fg="white", bg="#1a73e8").pack(side="left", padx=20)
+
+        tk.Label(header, text=f"Xin chào, {self.user_data.get('name', 'Admin')}",
+                 font=("Helvetica", 12), fg="white", bg="#1a73e8").pack(side="right", padx=20)
+
+    # --------------------- Sidebar ---------------------
+    def create_sidebar(self):
+        sidebar = tk.Frame(self.root, bg="#ffffff", width=220)
+        sidebar.pack(fill="y", side="left")
+
+        tk.Label(sidebar, text="QUẢN TRỊ", font=("Helvetica", 14, "bold"), bg="white", fg="#1a73e8").pack(pady=20)
 
         menu_items = [
-            ("📊 Tổng quan", self.show_overview),
-            ("👥 Quản lý người dùng", self.show_user_management),
-            ("📚 Quản lý từ vựng", self.show_vocab_management),
-            ("📈 Thống kê học tập", self.show_statistics),
-            ("⚙️ Cài đặt hệ thống", self.show_settings),
-            ("🚪 Đăng xuất", self.logout),
+            ("📊 Tổng quan", self.show_dashboard_overview),
+            ("👤 Hồ sơ Admin", self.show_admin_profile),
+            ("👤 Quản lý người dùng", self.show_account_management),
+            ("📘 Quản lý từ vựng", self.show_vocabulary_management),
+            ("📈 Thống kê hệ thống", self.view_stats),
+            ("🔓 Đăng xuất", self.logout)
         ]
 
-        for item in menu_items:
-            tk.Button(
-                sidebar,
-                text=item[0],
-                fg="white",
-                bg=COLORS["primary"],
-                font=("Helvetica", 13),
-                anchor="w",
-                relief="flat",
-                padx=30,
-                activebackground=COLORS["secondary"],
-                activeforeground="white",
-                command=item[1],
-                cursor="hand2"
-            ).pack(fill="x", pady=4)
+        for text, command in menu_items:
+            btn = tk.Button(
+                sidebar, text=text, font=("Helvetica", 12),
+                bg="#f1f3f4", fg="#202124", relief="flat", anchor="w",
+                padx=20, pady=10, width=20, cursor="hand2", command=command
+            )
+            btn.pack(pady=5)
 
-        self.content_frame = tk.Frame(self, bg="white")
-        self.content_frame.pack(side="right", fill="both", expand=True)
-        self.show_overview()
+    # --------------------- Main Content ---------------------
+    def create_main_content(self):
+        self.content_frame = tk.Frame(self.root, bg="#f5f7fa")
+        self.content_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        self.show_dashboard_overview()
 
     def clear_content(self):
         for widget in self.content_frame.winfo_children():
             widget.destroy()
 
-    def show_overview(self):
+    def show_dashboard_overview(self):
         self.clear_content()
-        users, admins = self.load_user_stats()
-        total_vocab = self.count_vocab()
 
-        tk.Label(self.content_frame, text="📊 Tổng quan hệ thống", font=("Helvetica", 22, "bold"), fg=COLORS["primary"], bg="white").pack(pady=(30, 10))
-        tk.Label(self.content_frame, text=f"Xin chào, quản trị viên {self.user.get('name', '')} 👋", font=("Helvetica", 14), fg="gray", bg="white").pack()
+        tk.Label(
+            self.content_frame,
+            text="📊 TỔNG QUAN HỆ THỐNG",
+            font=("Helvetica", 18, "bold"),
+            bg="#f5f7fa",
+            fg="#202124"
+        ).pack(anchor="w", pady=(0, 20), padx=10)
 
-        stats_frame = tk.Frame(self.content_frame, bg="white")
-        stats_frame.pack(pady=20)
+        stats = [
+            ("👥 Tổng số người dùng", self.count_users(), "#34a853"),
+            ("📘 Từ vựng đã thêm", self.count_vocab(), "#fbbc05"),
+            ("🛡️ Tài khoản Admin", self.count_admins(), "#ea4335"),
+        ]
 
-        self.create_stat_box(stats_frame, "👤 Tổng số người dùng", users)
-        self.create_stat_box(stats_frame, "🔐 Số quản trị viên", admins)
-        self.create_stat_box(stats_frame, "📚 Từ vựng hệ thống", total_vocab)
-        self.create_stat_box(stats_frame, "📝 Hoạt động hôm nay", 37)
+        card_container = tk.Frame(self.content_frame, bg="#f5f7fa")
+        card_container.pack(fill="x", padx=10, pady=10)
 
-    def create_stat_box(self, parent, label, value):
-        box = tk.Frame(parent, bg=COLORS["light"], bd=1, relief="solid")
-        box.pack(side="left", padx=20, ipadx=25, ipady=25)
-        tk.Label(box, text=label, bg=COLORS["light"], font=("Helvetica", 12)).pack(pady=(0, 10))
-        tk.Label(box, text=str(value), bg=COLORS["light"], font=("Helvetica", 18, "bold"), fg=COLORS["primary"]).pack()
+        for title, value, color in stats:
+            card = tk.Frame(
+                card_container,
+                bg="white",
+                width=260,
+                height=120,
+                highlightbackground="#dadce0",
+                highlightthickness=1
+            )
+            card.pack_propagate(False)
+            card.pack(side="left", padx=15)
 
-    def show_user_management(self):
+            tk.Label(card, text=title, font=("Helvetica", 13, "bold"), bg="white", fg="#202124").pack(pady=(15, 5))
+            tk.Label(card, text=str(value), font=("Helvetica", 24, "bold"), bg="white", fg=color).pack()
+
+    # --------------------- Admin Profile ---------------------
+    def show_admin_profile(self):
         self.clear_content()
-        tk.Label(self.content_frame, text="📋 Danh sách người dùng", font=("Helvetica", 14, "bold"), bg="white").pack(pady=10)
+        from .profile_admin import ProfileAdminWindow
+        profile_ui = ProfileAdminWindow(self.content_frame, self.user_data, None)
+        profile_ui.pack(fill="both", expand=True)
 
-        btn_frame = tk.Frame(self.content_frame, bg="white")
-        btn_frame.pack(pady=5)
-
-        tk.Button(btn_frame, text="➕ Thêm người dùng", command=self.add_user, bg=COLORS["primary"], fg="white", padx=10).pack(side="left", padx=10)
-
-        columns = ("Tên", "Email", "Vai trò", "Ngày tham gia")
-        self.tree = ttk.Treeview(self.content_frame, columns=columns, show="headings", height=10)
-        self.tree.pack(fill="both", expand=True, padx=20, pady=10)
-
-        for col in columns:
-            self.tree.heading(col, text=col)
-            self.tree.column(col, anchor="center")
-
-        self.load_users_table()
-        self.tree.bind("<Double-1>", self.edit_or_delete_user)
-
-    def show_vocab_management(self):
+    # --------------------- User Management ---------------------
+    def show_account_management(self):
         self.clear_content()
-        tk.Label(self.content_frame, text="📚 Danh sách từ vựng", font=("Helvetica", 14, "bold"), bg="white").pack(pady=10)
+        from .account_management import AccountManagement
+        account_ui = AccountManagement(self.content_frame)
+        account_ui.pack(fill="both", expand=True)
 
-        btn_frame = tk.Frame(self.content_frame, bg="white")
-        btn_frame.pack(pady=5)
-
-        tk.Button(btn_frame, text="➕ Thêm từ mới", command=self.add_vocab, bg=COLORS["primary"], fg="white", padx=10).pack(side="left", padx=10)
-
-        columns = ("Từ", "Nghĩa", "Loại")
-        tree = ttk.Treeview(self.content_frame, columns=columns, show="headings", height=10)
-        tree.pack(fill="both", expand=True, padx=20, pady=10)
-
-        try:
-            with open(self.vocab_file, "r") as f:
-                vocabs = json.load(f)
-        except:
-            vocabs = []
-
-        for word in vocabs:
-            tree.insert("", "end", values=(word.get("word", ""), word.get("meaning", ""), word.get("type", "")))
-
-    def show_statistics(self):
+    # --------------------- Vocab Management ---------------------
+    def show_vocabulary_management(self):
         self.clear_content()
-        tk.Label(self.content_frame, text="📈 Thống kê học tập", font=("Helvetica", 14, "bold"), bg="white").pack(pady=20)
-        tk.Label(self.content_frame, text="Tổng số lượt học hôm nay: 37\nTừ vựng học nhiều nhất: 'Environment'\nNgười dùng hoạt động: 12", bg="white", font=("Helvetica", 12)).pack()
+        from .vocabulary_management import VocabularyManagement
+        vocab_ui = VocabularyManagement(self.content_frame, self.user_data)
+        vocab_ui.pack(fill="both", expand=True)
 
-    def show_settings(self):
+    # --------------------- Stats View ---------------------
+    def view_stats(self):
         self.clear_content()
-        tk.Label(self.content_frame, text="⚙️ Cài đặt hệ thống", font=("Helvetica", 14, "bold"), bg="white").pack(pady=20)
+        tk.Label(self.content_frame, text="📈 THỐNG KÊ HỆ THỐNG", font=("Helvetica", 16, "bold"),
+                 bg="#f5f7fa", fg="#202124").pack(anchor="w", pady=10)
 
-        name = simpledialog.askstring("Cập nhật tên", "Nhập tên quản trị viên mới:")
-        if name:
-            self.user["name"] = name
-            try:
-                with open(self.users_file, "r+") as f:
-                    users = json.load(f)
-                    for u in users:
-                        if u["email"] == self.user["email"]:
-                            u["name"] = name
-                            break
-                    f.seek(0)
-                    json.dump(users, f, indent=4)
-                    f.truncate()
-                messagebox.showinfo("Thành công", "Đã cập nhật tên.")
-            except:
-                messagebox.showerror("Lỗi", "Không thể cập nhật tên.")
+        stats_texts = [
+            f"- Tổng số người dùng: {self.count_users()}",
+            f"- Tổng từ vựng: {self.count_vocab()}",
+            f"- Tài khoản admin: {self.count_admins()}",
+        ]
 
+        for text in stats_texts:
+            tk.Label(self.content_frame, text=text, font=("Helvetica", 12), bg="#f5f7fa").pack(anchor="w", pady=2)
+
+    # --------------------- Logout ---------------------
     def logout(self):
-        confirm = messagebox.askyesno("Xác nhận", "Bạn có chắc chắn muốn đăng xuất?")
+        confirm = messagebox.askyesno("Xác nhận đăng xuất", "Bạn có chắc chắn muốn đăng xuất?")
         if confirm:
-            self.master.destroy()
+            self.root.destroy()
             from auth.login import LoginWindow
             root = tk.Tk()
             LoginWindow(root)
             root.mainloop()
 
-    def load_user_stats(self):
-        try:
-            with open(self.users_file, "r") as f:
-                users = json.load(f)
-        except:
-            users = []
-        return len(users), sum(1 for u in users if u.get("role") == "admin")
+    # --------------------- Load & Save JSON ---------------------
+    def load_data(self):
+        if not os.path.exists(DB_PATH):
+            return {"users": [], "vocab": []}
+        with open(DB_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    def save_data(self, data):
+        with open(DB_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+
+    # --------------------- Count Functions ---------------------
+    def count_users(self):
+        data = self.load_data()
+        return len(data.get("users", []))
 
     def count_vocab(self):
-        try:
-            with open(self.vocab_file, "r") as f:
-                vocabs = json.load(f)
-            return len(vocabs)
-        except:
-            return 0
+        data = self.load_data()
+        return len(data.get("vocab", []))
 
-    def load_users_table(self):
-        for i in self.tree.get_children():
-            self.tree.delete(i)
-        try:
-            with open(self.users_file, "r") as f:
-                users = json.load(f)
-        except:
-            users = []
-        for user in users:
-            self.tree.insert("", "end", values=(user.get("name", ""), user.get("email", ""), user.get("role", "user").capitalize(), user.get("join_date", "")))
-
-    def edit_or_delete_user(self, event):
-        item = self.tree.focus()
-        values = self.tree.item(item, "values")
-        if not values:
-            return
-        action = messagebox.askquestion("Chọn hành động", f"Bạn muốn xóa người dùng '{values[0]}'?", icon="warning")
-        if action == "yes":
-            self.delete_user(values[1])
-
-    def delete_user(self, email):
-        try:
-            with open(self.users_file, "r") as f:
-                users = json.load(f)
-            users = [u for u in users if u.get("email") != email]
-            with open(self.users_file, "w") as f:
-                json.dump(users, f, indent=4)
-            messagebox.showinfo("Xóa thành công", "Người dùng đã bị xóa.")
-            self.load_users_table()
-        except:
-            messagebox.showerror("Lỗi", "Không thể xóa người dùng.")
-
-    def add_user(self):
-        name = simpledialog.askstring("Tên", "Nhập tên người dùng:")
-        email = simpledialog.askstring("Email", "Nhập email:")
-        role = simpledialog.askstring("Vai trò", "Nhập vai trò (user/admin):")
-        join_date = simpledialog.askstring("Ngày tham gia", "Nhập ngày (dd/mm/yyyy):")
-        if name and email:
-            try:
-                with open(self.users_file, "r+") as f:
-                    users = json.load(f)
-                    users.append({"name": name, "email": email, "role": role, "join_date": join_date})
-                    f.seek(0)
-                    json.dump(users, f, indent=4)
-                    f.truncate()
-                self.load_users_table()
-            except:
-                messagebox.showerror("Lỗi", "Không thể thêm người dùng.")
-
-    def add_vocab(self):
-        word = simpledialog.askstring("Từ", "Nhập từ tiếng Anh:")
-        meaning = simpledialog.askstring("Nghĩa", "Nhập nghĩa:")
-        word_type = simpledialog.askstring("Loại", "Nhập loại từ (noun, verb,...):")
-        if word and meaning:
-            try:
-                with open(self.vocab_file, "r+") as f:
-                    data = json.load(f)
-                    data.append({"word": word, "meaning": meaning, "type": word_type})
-                    f.seek(0)
-                    json.dump(data, f, indent=4)
-                    f.truncate()
-                messagebox.showinfo("Thành công", "Đã thêm từ mới.")
-                self.show_vocab_management()
-            except:
-                messagebox.showerror("Lỗi", "Không thể thêm từ mới.")
-
-from home.vocabulary_management import VocabularyManagement
-
-class DashboardAdmin(tk.Frame):
-    def __init__(self, parent, user):
-        super().__init__(parent)
-        self.user = user
-        self.content_frame = tk.Frame(self, bg="white")
-        self.content_frame.pack(fill="both", expand=True)
-        
-        # Nút menu quản lý từ vựng
-        tk.Button(self, text="📚 Quản lý từ vựng", command=self.show_vocabulary_management).pack()
-    
-    def clear_content(self):
-        for widget in self.content_frame.winfo_children():
-            widget.destroy()
-    
-    def show_vocabulary_management(self):
-        self.clear_content()
-        vocab_frame = VocabularyManagement(self.content_frame, self.user)
-        vocab_frame.pack(fill="both", expand=True)
-
-
-if __name__ == "__main__":
-    fake_user = {"name": "Admin", "email": "admin@example.com", "role": "admin"}
-    root = tk.Tk()
-    app = DashboardAdmin(root, fake_user)
-    root.mainloop()
+    def count_admins(self):
+        data = self.load_data()
+        return len([u for u in data.get("users", []) if u.get("role") == "admin"])

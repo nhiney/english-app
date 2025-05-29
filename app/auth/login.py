@@ -14,7 +14,7 @@ class LoginWindow(BaseWindow):
         super().__init__(root, "Login", WINDOW_SIZE['WIDTH'], WINDOW_SIZE['HEIGHT'])
         self.root = root
         self.root.title("Đăng nhập")
-        self.root.configure(bg='white')
+        self.root.configure(bg='#fefefe')
 
         # Căn giữa cửa sổ
         screen_width = self.root.winfo_screenwidth()
@@ -33,11 +33,11 @@ class LoginWindow(BaseWindow):
             raise FileNotFoundError(f"Image not found at: {image_path}")
 
         # Khung trái chứa ảnh
-        self.left_frame = tk.Frame(root, width=(WINDOW_SIZE['WIDTH'] / 3 * 2), height=WINDOW_SIZE['HEIGHT'], bg='#f0f2f5')
+        self.left_frame = tk.Frame(root, width=(WINDOW_SIZE['WIDTH'] / 3 * 2), height=WINDOW_SIZE['HEIGHT'], bg='#e8f0fe')
         self.left_frame.pack(side="left", fill="both", expand=False)
 
         self.left_image = self.load_and_resize_image(image_path, int(WINDOW_SIZE['WIDTH'] / 3 * 2), WINDOW_SIZE['HEIGHT'])
-        self.image_label = tk.Label(self.left_frame, image=self.left_image, bg='#f0f2f5')
+        self.image_label = tk.Label(self.left_frame, image=self.left_image, bg='#e8f0fe')
         self.image_label.place(relx=0.5, rely=0.5, anchor="center")
 
         # Khung phải chứa biểu mẫu đăng nhập
@@ -64,24 +64,24 @@ class LoginWindow(BaseWindow):
 
     def create_login_form(self):
         style = ttk.Style()
-        style.configure("TEntry", padding=10, font=("Helvetica", 12))
-        style.configure("TButton", padding=6, font=("Helvetica", 12, "bold"))
+        style.configure("TEntry", padding=10, font=("Segoe UI", 12))
+        style.configure("TButton", padding=6, font=("Segoe UI", 12, "bold"))
 
         # Tiêu đề và chào mừng
-        tk.Label(self.right_frame, text="English Learning", font=("Helvetica", 28, "bold"), fg="#1a73e8", bg="white").pack(pady=(40, 20))
-        tk.Label(self.right_frame, text="Welcome back!", font=("Helvetica", 16), fg="#5f6368", bg="white").pack(pady=(0, 30))
+        tk.Label(self.right_frame, text="English Learning", font=("Segoe UI", 28, "bold"), fg="#007bff", bg="white").pack(pady=(40, 20))
+        tk.Label(self.right_frame, text="Welcome back!", font=("Segoe UI", 16), fg="#555", bg="white").pack(pady=(0, 30))
 
         # Nhập email
         email_frame = tk.Frame(self.right_frame, bg="white")
         email_frame.pack(fill="x", pady=10)
-        tk.Label(email_frame, text="Email", font=("Helvetica", 12, "bold"), fg="#202124", bg="white").pack(anchor="w")
+        tk.Label(email_frame, text="Email", font=("Segoe UI", 12, "bold"), fg="#333", bg="white").pack(anchor="w")
         self.entry_email = ttk.Entry(email_frame, width=40)
         self.entry_email.pack(ipady=5, pady=5)
 
         # Nhập mật khẩu
         password_frame = tk.Frame(self.right_frame, bg="white")
         password_frame.pack(fill="x", pady=10)
-        tk.Label(password_frame, text="Password", font=("Helvetica", 12, "bold"), fg="#202124", bg="white").pack(anchor="w")
+        tk.Label(password_frame, text="Password", font=("Segoe UI", 12, "bold"), fg="#333", bg="white").pack(anchor="w")
         self.entry_password = ttk.Entry(password_frame, show="•", width=40)
         self.entry_password.pack(ipady=5, pady=5)
 
@@ -92,11 +92,11 @@ class LoginWindow(BaseWindow):
             variable=self.is_admin_var,
             onvalue=True,
             offvalue=False,
-            font=("Helvetica", 11),
+            font=("Segoe UI", 11),
             bg="white",
-            fg="#202124",
+            fg="#333",
             activebackground="white",
-            activeforeground="#202124",
+            activeforeground="#333",
             selectcolor="white"
         )
         admin_check.pack(pady=(5, 10), anchor="w")
@@ -106,10 +106,10 @@ class LoginWindow(BaseWindow):
             self.right_frame,
             text="Đăng nhập",
             command=self.login,
-            font=("Helvetica", 12, "bold"),
-            bg="#1a73e8",
+            font=("Segoe UI", 12, "bold"),
+            bg="#007bff",
             fg="white",
-            activebackground="#1557b0",
+            activebackground="#0056b3",
             activeforeground="white",
             relief="flat",
             padx=10,
@@ -117,23 +117,23 @@ class LoginWindow(BaseWindow):
             cursor="hand2"
         )
         self.btn_login.pack(pady=(20, 10), ipadx=10)
-        self.btn_login.bind("<Enter>", lambda e: self.btn_login.configure(bg="#1557b0"))
-        self.btn_login.bind("<Leave>", lambda e: self.btn_login.configure(bg="#1a73e8"))
+        self.btn_login.bind("<Enter>", lambda e: self.btn_login.configure(bg="#0056b3"))
+        self.btn_login.bind("<Leave>", lambda e: self.btn_login.configure(bg="#007bff"))
 
         # Nút mở form đăng ký
         self.btn_register = tk.Button(
             self.right_frame,
             text="Chưa có tài khoản? Đăng ký",
             command=self.open_register_window,
-            font=("Helvetica", 11),
+            font=("Segoe UI", 11),
             bg="white",
-            fg="#1a73e8",
+            fg="#007bff",
             relief="flat",
             cursor="hand2"
         )
         self.btn_register.pack(pady=5)
-        self.btn_register.bind("<Enter>", lambda e: self.btn_register.configure(fg="#1557b0"))
-        self.btn_register.bind("<Leave>", lambda e: self.btn_register.configure(fg="#1a73e8"))
+        self.btn_register.bind("<Enter>", lambda e: self.btn_register.configure(fg="#0056b3"))
+        self.btn_register.bind("<Leave>", lambda e: self.btn_register.configure(fg="#007bff"))
 
     def login(self):
         email = self.entry_email.get().strip()
@@ -170,7 +170,6 @@ class LoginWindow(BaseWindow):
                 return
 
         messagebox.showerror("Lỗi", "Email hoặc mật khẩu không đúng!")
-
 
     def open_register_window(self):
         self.root.destroy()

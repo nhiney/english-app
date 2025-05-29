@@ -14,14 +14,12 @@ class RegisterWindow:
         self.root.title("Đăng ký tài khoản")
         self.root.configure(bg='white')
 
-        # Căn giữa cửa sổ
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         x = int((screen_width / 2) - (WINDOW_SIZE['WIDTH'] / 2))
         y = int((screen_height / 2) - (WINDOW_SIZE['HEIGHT'] / 2))
         self.root.geometry(f"{WINDOW_SIZE['WIDTH']}x{WINDOW_SIZE['HEIGHT']}+{x}+{y}")
 
-        # Load ảnh
         if getattr(sys, 'frozen', False):
             base_path = os.path.join(sys._MEIPASS, 'app')
         else:
@@ -31,17 +29,17 @@ class RegisterWindow:
         if not os.path.exists(image_path):
             raise FileNotFoundError(f"Image not found at: {image_path}")
 
-        # Frame ảnh
-        self.left_frame = tk.Frame(root, width=(WINDOW_SIZE['WIDTH'] / 3 * 2), height=WINDOW_SIZE['HEIGHT'], bg='#f0f2f5')
-        self.left_frame.pack(side="left", fill="both", expand=False)
+        # Left frame (image)
+        self.left_frame = tk.Frame(root, width=(WINDOW_SIZE['WIDTH'] * 2 // 3), bg='#e3f2fd')
+        self.left_frame.pack(side="left", fill="both")
 
-        self.left_image = self.load_and_resize_image(image_path, int(WINDOW_SIZE['WIDTH'] / 3 * 2), WINDOW_SIZE['HEIGHT'])
-        self.image_label = tk.Label(self.left_frame, image=self.left_image, bg='#f0f2f5')
+        self.left_image = self.load_and_resize_image(image_path, int(WINDOW_SIZE['WIDTH'] * 2 / 3), WINDOW_SIZE['HEIGHT'])
+        self.image_label = tk.Label(self.left_frame, image=self.left_image, bg='#e3f2fd')
         self.image_label.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Frame form
+        # Right frame (form)
         self.right_frame = tk.Frame(root, bg="white")
-        self.right_frame.pack(side="right", fill="both", expand=True, padx=40)
+        self.right_frame.pack(side="right", fill="both", expand=True, padx=30)
 
         self.create_register_form()
 
@@ -61,86 +59,81 @@ class RegisterWindow:
         return ImageTk.PhotoImage(resized)
 
     def create_register_form(self):
-        style = ttk.Style()
-        style.configure("TEntry", padding=10, relief="flat", font=("Helvetica", 12))
-        style.configure("TButton", padding=6, font=("Helvetica", 12, "bold"))
+        title = tk.Label(self.right_frame, text="English Learning", font=("Helvetica", 26, "bold"), fg="#1a73e8", bg="white")
+        title.pack(pady=(40, 5))
 
-        # Tiêu đề
-        title_label = tk.Label(self.right_frame, text="English Learning", font=("Helvetica", 28, "bold"), fg="#1a73e8", bg="white")
-        title_label.pack(pady=(30, 10))
+        subtitle = tk.Label(self.right_frame, text="Tạo tài khoản mới", font=("Helvetica", 14), fg="#5f6368", bg="white")
+        subtitle.pack(pady=(0, 25))
 
-        welcome_label = tk.Label(self.right_frame, text="Create your account", font=("Helvetica", 16), fg="#5f6368", bg="white")
-        welcome_label.pack(pady=(0, 25))
-
-        # Các trường nhập
+        # Fields
         fields = [
-            ("Full Name", "entry_name"),
+            ("Họ và tên", "entry_name"),
             ("Email", "entry_email"),
-            ("Password", "entry_password"),
-            ("Confirm Password", "entry_confirm_password")
+            ("Mật khẩu", "entry_password"),
+            ("Xác nhận mật khẩu", "entry_confirm_password")
         ]
 
         for label_text, attr_name in fields:
             frame = tk.Frame(self.right_frame, bg="white")
-            frame.pack(fill="x", pady=(5, 10))
+            frame.pack(fill="x", pady=(5, 12))
 
-            label = tk.Label(frame, text=label_text, font=("Helvetica", 12, "bold"), fg="#202124", bg="white")
+            label = tk.Label(frame, text=label_text, font=("Helvetica", 11, "bold"), fg="#202124", bg="white")
             label.pack(anchor="w")
 
-            entry = ttk.Entry(frame, width=40, show="•" if "Password" in label_text else "")
-            entry.pack(ipady=5, pady=5)
+            entry = ttk.Entry(frame, width=40, show="•" if "mật khẩu" in label_text.lower() else "")
+            entry.pack(ipady=6, pady=4)
 
             setattr(self, attr_name, entry)
 
         # Vai trò
         role_frame = tk.Frame(self.right_frame, bg="white")
-        role_frame.pack(fill="x", pady=(5, 15))
+        role_frame.pack(fill="x", pady=(10, 15))
 
-        label_role = tk.Label(role_frame, text="Vai trò", font=("Helvetica", 12, "bold"), fg="#202124", bg="white")
+        label_role = tk.Label(role_frame, text="Vai trò", font=("Helvetica", 11, "bold"), fg="#202124", bg="white")
         label_role.pack(anchor="w", pady=(0, 5))
 
         self.role_var = tk.StringVar(value="user")
 
-        radio_user = tk.Radiobutton(role_frame, text="Người dùng (User)", variable=self.role_var, value="user", font=("Helvetica", 11), bg="white", anchor="w")
-        radio_admin = tk.Radiobutton(role_frame, text="Quản trị viên (Admin)", variable=self.role_var, value="admin", font=("Helvetica", 11), bg="white", anchor="w")
+        radio_user = tk.Radiobutton(role_frame, text="Người dùng", variable=self.role_var, value="user", bg="white", font=("Helvetica", 10), anchor="w")
+        radio_admin = tk.Radiobutton(role_frame, text="Quản trị viên", variable=self.role_var, value="admin", bg="white", font=("Helvetica", 10), anchor="w")
 
         radio_user.pack(anchor="w")
         radio_admin.pack(anchor="w")
 
-        # Nút đăng ký
+        # Register Button
         self.btn_register = tk.Button(
-            self.right_frame, 
-            text="Đăng ký", 
+            self.right_frame,
+            text="Đăng ký",
             command=self.register,
             font=("Helvetica", 12, "bold"),
             bg="#1a73e8",
             fg="white",
-            activebackground="#1557b0",
-            activeforeground="white",
+            activebackground="#1669c1",
             relief="flat",
             padx=10,
-            pady=8,
+            pady=10,
             cursor="hand2"
         )
-        self.btn_register.pack(pady=(10, 5), ipadx=10)
+        self.btn_register.pack(pady=(20, 10), ipadx=10, fill="x")
 
-        # Nút quay lại
+        # Back Button
         self.btn_back = tk.Button(
-            self.right_frame, 
-            text="Quay lại Đăng nhập", 
+            self.right_frame,
+            text="← Quay lại đăng nhập",
             command=self.open_login_window,
-            font=("Helvetica", 11),
+            font=("Helvetica", 10),
             bg="white",
             fg="#1a73e8",
             relief="flat",
             cursor="hand2"
         )
-        self.btn_back.pack(pady=5)
+        self.btn_back.pack()
 
+        # Hover effects
         self.btn_register.bind("<Enter>", lambda e: self.btn_register.configure(bg="#1557b0"))
         self.btn_register.bind("<Leave>", lambda e: self.btn_register.configure(bg="#1a73e8"))
 
-        self.btn_back.bind("<Enter>", lambda e: self.btn_back.configure(fg="#1557b0"))
+        self.btn_back.bind("<Enter>", lambda e: self.btn_back.configure(fg="#0c47a1"))
         self.btn_back.bind("<Leave>", lambda e: self.btn_back.configure(fg="#1a73e8"))
 
     def register(self):
@@ -159,30 +152,28 @@ class RegisterWindow:
             return
 
         if not is_valid_password(password):
-            messagebox.showerror("Lỗi", "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!")
+            messagebox.showerror("Lỗi", "Mật khẩu cần có ít nhất 8 ký tự gồm chữ hoa, thường, số và ký tự đặc biệt!")
             return
 
         if password != confirm_password:
-            messagebox.showerror("Lỗi", "Mật khẩu xác nhận không khớp!")
+            messagebox.showerror("Lỗi", "Xác nhận mật khẩu không khớp!")
             return
 
         database = load_database()
-        for user in database["users"]:
-            if user["email"] == email:
-                messagebox.showerror("Lỗi", "Email đã được đăng ký!")
-                return
+        if any(user["email"] == email for user in database["users"]):
+            messagebox.showerror("Lỗi", "Email đã được đăng ký!")
+            return
 
-        hashed_password = hash_password(password)
         new_user = {
             "name": name,
             "email": email,
-            "password": hashed_password,
+            "password": hash_password(password),
             "role": role
         }
 
         database["users"].append(new_user)
         save_database(database)
-        messagebox.showinfo("Thành công", f"Tài khoản {role.upper()} đã được tạo thành công!")
+        messagebox.showinfo("Thành công", f"Tài khoản {role.upper()} đã được tạo!")
 
         self.open_login_window()
 

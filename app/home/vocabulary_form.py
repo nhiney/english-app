@@ -49,22 +49,23 @@ class VocabularyForm(BaseWindow):
             return text_widget
 
         self.word_var = tk.StringVar()
-        self.unit_var = tk.StringVar()
+        self.meaning_var = tk.StringVar()
         self.type_var = tk.StringVar()
         self.answers_var = tk.StringVar()
 
         add_label_entry(0, "📘 Word:", self.word_var)
-        add_label_entry(1, "📦 Unit ID:", self.unit_var)
 
         ttk.Label(form_frame, text="🔤 Word Type:").grid(row=2, column=0, sticky="w", padx=(10, 5), pady=8)
         self.type_combobox = ttk.Combobox(form_frame, textvariable=self.type_var, state="readonly",
-                                          values=["V", "N", "Adj", "Adv", "Prep", "Conj"], width=37)
+                                          values=["Verb", "Noun", "Adj", "Adv", "Prep", "Conj"], width=37)
         self.type_combobox.grid(row=2, column=1, sticky="ew", padx=10, pady=8, ipady=4)
-        self.type_combobox.set("V")
+        self.type_combobox.set("Verb")
 
-        add_label_entry(3, "💡 Answers (comma-separated):", self.answers_var)
-        self.sentences_text = add_label_text(4, "📝 Sentences:", 4)
-        self.phrases_text = add_label_text(5, "🔗 Phrases:", 4)
+        add_label_entry(1, "VN Vietnamese Meaning:", self.meaning_var)
+
+        add_label_entry(3, "💡 Synonyms (comma-separated) (từ đồng nghĩa):", self.answers_var)
+        self.sentences_text = add_label_text(4, "📝 Sentences (ví dụ):", 4)
+        self.phrases_text = add_label_text(5, "🔗 Phrases (các cụm từ có chứa từ này):", 4)
 
         button_frame = tk.Frame(form_frame, bg="#ffffff")
         button_frame.grid(row=6, column=0, columnspan=2, pady=25)
@@ -79,9 +80,9 @@ class VocabularyForm(BaseWindow):
         if not self.word_data:
             return
         self.word_var.set(self.word_data.get("word", ""))
-        self.unit_var.set(str(self.word_data.get("unitId", "")))
         verb_types = self.word_data.get("verb", [])
         self.type_var.set(verb_types[0] if verb_types else "V")
+        self.meaning_var.set(self.word_data.get("meaning", ""))
         answers = self.word_data.get("answers", [])
         self.answers_var.set(", ".join(answers))
         sentences = self.word_data.get("sentences", [])
@@ -93,36 +94,27 @@ class VocabularyForm(BaseWindow):
 
     def save_word(self):
         word = self.word_var.get().strip()
-        unit_id = self.unit_var.get().strip()
+        meaning = self.meaning_var.get().strip()
         word_type = self.type_var.get()
         answers = [a.strip() for a in self.answers_var.get().split(",") if a.strip()]
         sentences = [s.strip() for s in self.sentences_text.get("1.0", "end-1c").split("\n") if s.strip()]
         phrases = [p.strip() for p in self.phrases_text.get("1.0", "end-1c").split("\n") if p.strip()]
 
-        if not word or not unit_id or not answers:
+        if not word or not answers:
             messagebox.showerror("Error", "Please fill in all required fields.")
             return
 
         try:
             database = load_word_database()
-            new_id = f"U{unit_id}_{len(database) + 1:02d}" if not self.is_edit else self.word_data["id"]
+            new_id = f"W{len(database) + 1:04d}" if not self.is_edit else self.word_data["id"]
             word_data = {
-                "id": new_id,
-                "unitId": int(unit_id),
                 "word": word,
+                "meaning": meaning,
                 "answers": answers,
                 "sentences": sentences,
                 "phrases": phrases,
                 "verb": [word_type]
             }
-
-            if self.is_edit:
-                for i, w in enumerate(database):
-                    if w["id"] == self.word_data["id"]:
-                        database[i] = word_data
-                        break
-            else:
-                database.append(word_data)
 
             save_word_database(database)
             messagebox.showinfo("Success", f"Word '{word}' has been {'updated' if self.is_edit else 'added'} successfully!")

@@ -4,14 +4,14 @@ from PIL import Image, ImageTk
 import json
 import os
 
-DB_PATH = "data/database.json"
+DB_PATH = os.path.abspath("app/data/database.json")
 
 class DashboardAdminWindow:
     def __init__(self, root, user_data):
         self.root = root
         self.user_data = user_data
         self.root.title("Admin Dashboard - English Vocabulary App")
-        self.root.geometry("1000x600")
+        self.root.geometry("1000x800")
         self.root.configure(bg="#f5f7fa")
 
         self.create_header()
@@ -63,9 +63,9 @@ class DashboardAdminWindow:
         for widget in self.content_frame.winfo_children():
             widget.destroy()
 
+    # --------------------- Dashboard Overview ---------------------
     def show_dashboard_overview(self):
         self.clear_content()
-
         tk.Label(
             self.content_frame,
             text="📊 TỔNG QUAN HỆ THỐNG",
@@ -75,15 +75,19 @@ class DashboardAdminWindow:
         ).pack(anchor="w", pady=(0, 20), padx=10)
 
         stats = [
-            ("👥 Tổng số người dùng", self.count_users(), "#34a853"),
+            ("👥 Tổng số người dùng", self.count_user_accounts(), "#34a853"),
             ("📘 Từ vựng đã thêm", self.count_vocab(), "#fbbc05"),
-            ("🛡️ Tài khoản Admin", self.count_admins(), "#ea4335"),
+            ("📈 Từ vựng đã học", self.count_vocab(), "#ea4335"),
+            ("📝 Từ vựng yêu thích", self.count_vocab(), "#4285f4")
         ]
 
         card_container = tk.Frame(self.content_frame, bg="#f5f7fa")
         card_container.pack(fill="x", padx=10, pady=10)
 
-        for title, value, color in stats:
+        for i, (title, value, color) in enumerate(stats):
+            row = i // 2
+            col = i % 2
+
             card = tk.Frame(
                 card_container,
                 bg="white",
@@ -92,8 +96,8 @@ class DashboardAdminWindow:
                 highlightbackground="#dadce0",
                 highlightthickness=1
             )
-            card.pack_propagate(False)
-            card.pack(side="left", padx=15)
+            card.grid(row=row, column=col, padx=15, pady=15, sticky="nsew")
+            card.grid_propagate(False)
 
             tk.Label(card, text=title, font=("Helvetica", 13, "bold"), bg="white", fg="#202124").pack(pady=(15, 5))
             tk.Label(card, text=str(value), font=("Helvetica", 24, "bold"), bg="white", fg=color).pack()
@@ -126,9 +130,8 @@ class DashboardAdminWindow:
                  bg="#f5f7fa", fg="#202124").pack(anchor="w", pady=10)
 
         stats_texts = [
-            f"- Tổng số người dùng: {self.count_users()}",
-            f"- Tổng từ vựng: {self.count_vocab()}",
-            f"- Tài khoản admin: {self.count_admins()}",
+            f"- Tổng số người dùng: {self.count_user_accounts()}",
+            f"- Tổng số từ: {self.count_vocab()}",
         ]
 
         for text in stats_texts:
@@ -156,14 +159,22 @@ class DashboardAdminWindow:
             json.dump(data, f, indent=4, ensure_ascii=False)
 
     # --------------------- Count Functions ---------------------
-    def count_users(self):
-        data = self.load_data()
-        return len(data.get("users", []))
+
+    def count_user_accounts(self):
+        try:
+            with open(DB_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        
+        # First, check if the "users" key exists
+            users = data.get("users", [])
+        
+        # Count users with role="User", and handle cases where role doesn't exist
+            user_count = sum(1 for u in users if u.get("role") == "User")
+        
+            return user_count
+        except Exception as e:
+            return 0
 
     def count_vocab(self):
         data = self.load_data()
         return len(data.get("vocab", []))
-
-    def count_admins(self):
-        data = self.load_data()
-        return len([u for u in data.get("users", []) if u.get("role") == "admin"])

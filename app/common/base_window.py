@@ -8,7 +8,10 @@ class BaseWindow:
         self.root = root
         self.root.title(title)
         self.root.configure(bg='white')
-        
+        self.image_path = None
+        self.left_width_ratio = 2/3
+        self.left_image_original = None
+
         # Center window
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
@@ -17,27 +20,44 @@ class BaseWindow:
         self.root.geometry(f"{width}x{height}+{x}+{y}")
 
     def create_split_layout(self, image_path, left_width_ratio=2/3):
+        self.image_path = image_path
+        self.left_width_ratio = left_width_ratio
+
         # Left frame for image
-        self.left_frame = tk.Frame(self.root, 
-                                 width=int(self.root.winfo_width() * left_width_ratio), 
-                                 height=self.root.winfo_height(),
-                                 bg='#f0f2f5')
-        self.left_frame.pack(side="left", fill="both", expand=False)
-
-        # Load and resize image
-        self.left_image = self.load_and_resize_image(image_path, 
-                                                   int(self.root.winfo_width() * left_width_ratio),
-                                                   self.root.winfo_height())
-
-        self.image_label = tk.Label(self.left_frame, image=self.left_image, bg='#f0f2f5')
-        self.image_label.place(relx=0.5, rely=0.5, anchor="center")
+        self.left_frame = tk.Frame(self.root, bg='#f0f2f5')
+        self.left_frame.pack(side="left", fill="both", expand=True)
 
         # Right frame for content
         self.right_frame = tk.Frame(self.root, bg="white")
         self.right_frame.pack(side="right", fill="both", expand=True, padx=40)
 
-    def load_and_resize_image(self, path, frame_width, frame_height):
-        image = Image.open(path)
+        # Load original image
+        self.left_image_original = Image.open(image_path)
+
+        # Initial image
+        self.left_image = self.load_and_resize_image(self.left_image_original, 400, 400)
+        self.image_label = tk.Label(self.left_frame, image=self.left_image, bg='#f0f2f5')
+        self.image_label.place(relx=0.5, rely=0.5, anchor="center")
+
+        # Bind resize event
+        self.root.bind("<Configure>", self.on_resize)
+
+    def on_resize(self, event):
+        # Calculate new sizes
+        total_width = self.root.winfo_width()
+        total_height = self.root.winfo_height()
+        left_width = int(total_width * self.left_width_ratio)
+        left_height = total_height
+
+        # Resize left_frame
+        self.left_frame.config(width=left_width, height=left_height)
+        # Resize image
+        if self.left_image_original:
+            self.left_image = self.load_and_resize_image(self.left_image_original, left_width, left_height)
+            self.image_label.configure(image=self.left_image)
+            self.image_label.image = self.left_image
+
+    def load_and_resize_image(self, image, frame_width, frame_height):
         img_ratio = image.width / image.height
         frame_ratio = frame_width / frame_height
 
@@ -48,7 +68,7 @@ class BaseWindow:
             new_height = frame_height
             new_width = int(frame_height * img_ratio)
 
-        resized = image.resize((new_width, new_height), Image.LANCZOS)
+        resized = image.resize((max(1, new_width), max(1, new_height)), Image.LANCZOS)
         return ImageTk.PhotoImage(resized)
 
     def create_title(self, text, frame, pady=(40, 20)):

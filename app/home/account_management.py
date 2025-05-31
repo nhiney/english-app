@@ -1,16 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox, Toplevel
 from common.colors import COLORS
+from tkinter import ttk
 
 class AccountManagement(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent, bg="white")
-        self.accounts = [
-            {"name": "Admin", "email": "admin@example.com", "role": "admin"},
-            {"name": "User 1", "email": "user1@example.com", "role": "user"},
-            {"name": "User 2", "email": "user2@example.com", "role": "user"},
-        ]
-
         tk.Label(
             self, text="⚙️ Quản lý tài khoản",
             font=("Helvetica", 20, "bold"),
@@ -94,7 +89,7 @@ class AccountManagement(tk.Frame):
 
     def open_account_form(self, index=None):
         is_edit = index is not None
-        account = self.accounts[index] if is_edit else {"name": "", "email": "", "role": ""}
+        account = self.accounts[index] if is_edit else {"name": "", "email": "", "role": "user"}
 
         window = Toplevel(self)
         window.title("Sửa tài khoản" if is_edit else "Thêm tài khoản")
@@ -107,29 +102,30 @@ class AccountManagement(tk.Frame):
         form_frame = tk.Frame(window, bg="white")
         form_frame.pack(pady=10, padx=30, fill="both", expand=True)
 
+    # Họ tên
         tk.Label(form_frame, text="Họ tên:", font=("Helvetica", 12), bg="white").grid(row=0, column=0, sticky="w", pady=5)
         name_entry = tk.Entry(form_frame, font=("Helvetica", 12))
         name_entry.grid(row=0, column=1, pady=5, ipadx=10)
         name_entry.insert(0, account["name"])
 
+    # Email
         tk.Label(form_frame, text="Email:", font=("Helvetica", 12), bg="white").grid(row=1, column=0, sticky="w", pady=5)
         email_entry = tk.Entry(form_frame, font=("Helvetica", 12))
         email_entry.grid(row=1, column=1, pady=5, ipadx=10)
         email_entry.insert(0, account["email"])
 
+    # Vai trò (Combobox thay vì Entry)
         tk.Label(form_frame, text="Vai trò:", font=("Helvetica", 12), bg="white").grid(row=2, column=0, sticky="w", pady=5)
-        role_entry = tk.Entry(form_frame, font=("Helvetica", 12))
-        role_entry.grid(row=2, column=1, pady=5, ipadx=10)
-        role_entry.insert(0, account["role"])
+        role_var = tk.StringVar()
+        role_combobox = ttk.Combobox(form_frame, textvariable=role_var, state="readonly", values=["User", "Admin"], font=("Helvetica", 12), width=17)
+        role_combobox.grid(row=2, column=1, pady=5, ipadx=5)
+        role_combobox.set(account["role"] if account["role"] in ["User", "Admin"] else "User")
+
 
         def save():
             name = name_entry.get().strip()
             email = email_entry.get().strip()
-            role = role_entry.get().strip().lower()
-
-            if not name or not email or role not in ["admin", "user"]:
-                messagebox.showwarning("Lỗi", "Vui lòng nhập đầy đủ và đúng thông tin!", parent=window)
-                return
+            role = role_var.get().strip().lower()
 
             if is_edit:
                 self.accounts[index] = {"name": name, "email": email, "role": role}

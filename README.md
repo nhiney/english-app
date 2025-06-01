@@ -84,3 +84,9 @@ pyinstaller app.spec
 pyinstaller --name EnglishApp --add-data "app/data;app/data" --hidden-import auth --hidden-import home --hidden-import common --hidden-import utils --hidden-import app.auth --hidden-import app.home --hidden-import app.common --hidden-import app.utils app/main.py
 pyinstaller --onefile --windowed app/main.py
 ```
+
+### Cách để cài đặt một thư viện vào trong requirment.txt
+
+```bash
+pip install requests && pip freeze > requirements.txt
+```

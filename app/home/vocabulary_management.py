@@ -58,7 +58,7 @@ class VocabularyManagement(tk.Frame):
         tk.Button(btn_frame, text="💾 Export JSON", command=self.export_json,
                   bg="#16a085", fg="white", font=("Segoe UI", 10), relief="flat", width=14).pack(side="left", padx=5)
 
-        if self.user["role"] == "admin":
+        if self.user["role"] == "Admin":
             tk.Button(btn_frame, text="📂 Import JSON", command=self.import_json,
                       bg="#8e44ad", fg="white", font=("Segoe UI", 10), relief="flat", width=14).pack(side="left", padx=5)
             tk.Button(btn_frame, text="➕ Add Word", command=self.add_word,

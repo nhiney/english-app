@@ -90,3 +90,11 @@ pyinstaller --onefile --windowed app/main.py
 ```bash
 pip install requests && pip freeze > requirements.txt
 ```
+
+### Hướng dẫn sử dụng ứng dụng
+```bash
+admin: yennhi0906@gmail.com
+pass: YENnhi0906@
+user: yennhi2005@gmail.com
+pass: YENnhi2005@
+```

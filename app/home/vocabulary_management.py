@@ -38,7 +38,7 @@ class VocabularyManagement(tk.Frame):
         table_frame = tk.Frame(self, bg="#f4f6f8")
         table_frame.pack(pady=10, padx=20, fill="both", expand=True)
 
-        columns = ("ID", "Word", "Type", "Sentences", "Phrases")
+        columns = ("Word", "Type", "Sentences", "Phrases")
         self.word_table = ttk.Treeview(table_frame, columns=columns, show="headings", height=12)
         style = ttk.Style()
         style.configure("Treeview.Heading", font=("Segoe UI", 10, "bold"))
@@ -75,7 +75,6 @@ class VocabularyManagement(tk.Frame):
 
             for item in vocabulary_list:
                 self.word_table.insert("", "end", values=(
-                    item.get("id", ""),
                     item.get("word", ""),
                     ", ".join(item.get("verb", []) or []),
                     ", ".join(item.get("sentences", []) or []),
@@ -106,7 +105,6 @@ class VocabularyManagement(tk.Frame):
             else:
                 for item in filtered_words:
                     self.word_table.insert("", "end", values=(
-                        item.get("id", ""),
                         item.get("word", ""),
                         ", ".join(item.get("verb", []) or []),
                         ", ".join(item.get("sentences", []) or []),
@@ -126,7 +124,6 @@ class VocabularyManagement(tk.Frame):
             self.word_table.delete(*self.word_table.get_children())
             for item in filtered_words:
                 self.word_table.insert("", "end", values=(
-                    item.get("id", ""),
                     item.get("word", ""),
                     ", ".join(item.get("verb", []) or []),
                     ", ".join(item.get("sentences", []) or []),
@@ -141,14 +138,13 @@ class VocabularyManagement(tk.Frame):
 
     def edit_word(self):
         selected = self.word_table.selection()
+        word_text = self.word_table.item(selected[0])["values"][1]
         if not selected:
             messagebox.showerror("Error", "Please select a word to edit.")
             return
-
-        word_id = self.word_table.item(selected[0])["values"][0]
         try:
             vocabulary_list = load_word_database()
-            word_data = next((w for w in vocabulary_list if w["id"] == word_id), None)
+            word_data = next((w for w in vocabulary_list if w["word"] == word_text), None)
             if not word_data:
                 messagebox.showerror("Error", "Word not found.")
                 return
@@ -166,7 +162,6 @@ class VocabularyManagement(tk.Frame):
             messagebox.showerror("Error", "Please select a word to delete.")
             return
 
-        word_id = self.word_table.item(selected[0])["values"][0]
         word_text = self.word_table.item(selected[0])["values"][1]
 
         if not messagebox.askyesno("Confirm", f"Are you sure you want to delete '{word_text}'?"):
@@ -174,7 +169,7 @@ class VocabularyManagement(tk.Frame):
 
         try:
             database = load_word_database()
-            database = [w for w in database if w["id"] != word_id]
+            database = [w for w in database if w["word"] != word_text]
             save_word_database(database)
             self.load_vocabulary_data()
             messagebox.showinfo("Success", f"'{word_text}' has been deleted.")
@@ -197,9 +192,9 @@ class VocabularyManagement(tk.Frame):
                 raise ValueError("Invalid JSON format")
 
             database = load_word_database()
-            existing_ids = {w["id"] for w in database}
+            existing_ids = {w["word"] for w in database}
             for item in imported_data:
-                if item["id"] not in existing_ids:
+                if item["word"] not in existing_ids:
                     database.append(item)
 
             save_word_database(database)

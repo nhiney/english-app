@@ -1,52 +1,47 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox
 from PIL import Image, ImageTk
 import json
 import os
 
 DB_PATH = os.path.abspath("app/data/database.json")
 
+
 class DashboardAdminWindow:
     def __init__(self, root, user_data):
         self.root = root
         self.user_data = user_data
         self.root.title("Admin Dashboard - English Vocabulary App")
-<<<<<<< HEAD
-        self.root.geometry("1000x800")
-        self.root.configure(bg="#f5f7fa")
-=======
+
         self.root.geometry("1100x650")
-        self.root.configure(bg="#eef2f7")
->>>>>>> 7b155ad5d751785f76e13f0fc3b2fbda46b93686
+        self.root.configure(bg="#e3edf7")
 
         self.create_header()
         self.create_sidebar()
         self.create_main_content()
 
-    # --------------------- Header ---------------------
     def create_header(self):
-        header = tk.Frame(self.root, bg="#3f51b5", height=60)
+        header = tk.Frame(self.root, bg="#1f3a93", height=60)
         header.pack(fill="x", side="top")
 
         tk.Label(header, text="📘 English Vocabulary - Admin Dashboard",
-                 font=("Segoe UI", 18, "bold"), fg="white", bg="#3f51b5").pack(side="left", padx=25)
+                 font=("Segoe UI", 18, "bold"), fg="white", bg="#1f3a93").pack(side="left", padx=25)
 
         tk.Label(header, text=f"Hello, {self.user_data.get('name', 'Admin')} 👋",
-                 font=("Segoe UI", 12), fg="white", bg="#3f51b5").pack(side="right", padx=25)
+                 font=("Segoe UI", 12), fg="white", bg="#1f3a93").pack(side="right", padx=25)
 
-    # --------------------- Sidebar ---------------------
     def create_sidebar(self):
         sidebar = tk.Frame(self.root, bg="white", width=230)
         sidebar.pack(fill="y", side="left")
 
         tk.Label(sidebar, text="ADMIN MENU", font=("Segoe UI", 14, "bold"),
-                 bg="white", fg="#3f51b5").pack(pady=(20, 10))
+                 bg="white", fg="#1f3a93").pack(pady=(20, 10))
 
         menu_items = [
             ("📊 Overview", self.show_dashboard_overview),
             ("👤 Admin Profile", self.show_admin_profile),
             ("👥 User Management", self.show_account_management),
-            ("📘 Vocabulary", self.show_vocabulary_management),
+            ("📚 Vocabulary", self.show_vocabulary_management),
             ("📈 Statistics", self.view_stats),
             ("🚪 Log Out", self.logout)
         ]
@@ -54,14 +49,14 @@ class DashboardAdminWindow:
         for text, command in menu_items:
             btn = tk.Button(
                 sidebar, text=text, font=("Segoe UI", 12),
-                bg="#f0f0f0", fg="#212121", relief="flat", anchor="w",
-                padx=25, pady=10, width=20, cursor="hand2", command=command
+                bg="#f5f6fa", fg="#2c3e50", relief="flat", anchor="w",
+                padx=25, pady=10, width=20, cursor="hand2", command=command,
+                activebackground="#d6e0f0", activeforeground="#000"
             )
             btn.pack(pady=5)
 
-    # --------------------- Main Content ---------------------
     def create_main_content(self):
-        self.content_frame = tk.Frame(self.root, bg="#eef2f7")
+        self.content_frame = tk.Frame(self.root, bg="#e3edf7")
         self.content_frame.pack(fill="both", expand=True, padx=20, pady=20)
         self.show_dashboard_overview()
 
@@ -69,41 +64,31 @@ class DashboardAdminWindow:
         for widget in self.content_frame.winfo_children():
             widget.destroy()
 
-    # --------------------- Dashboard Overview ---------------------
     def show_dashboard_overview(self):
         self.clear_content()
         tk.Label(
             self.content_frame,
             text="📊 SYSTEM OVERVIEW",
             font=("Segoe UI", 20, "bold"),
-            bg="#eef2f7",
-            fg="#212121"
+            bg="#e3edf7",
+            fg="#2c3e50"
         ).pack(anchor="w", pady=(0, 20), padx=10)
 
         stats = [
-<<<<<<< HEAD
-            ("👥 Tổng số người dùng", self.count_user_accounts(), "#34a853"),
-            ("📘 Từ vựng đã thêm", self.count_vocab(), "#fbbc05"),
-            ("📈 Từ vựng đã học", self.count_vocab(), "#ea4335"),
-            ("📝 Từ vựng yêu thích", self.count_vocab(), "#4285f4")
-=======
-            ("👥", "Total Users", self.count_users(), "#4caf50"),
-            ("📘", "Vocabulary Entries", self.count_vocab(), "#ff9800"),
-            ("🛡️", "Admin Accounts", self.count_admins(), "#f44336"),
->>>>>>> 7b155ad5d751785f76e13f0fc3b2fbda46b93686
+            ("👥", "Total Users", self.count_user_accounts(), "#27ae60"),
+            ("📚", "Vocabulary Entries", self.count_vocab(), "#e67e22"),
+            ("🛡️", "Admin Accounts", self.count_admins(), "#c0392b")
         ]
 
-        card_container = tk.Frame(self.content_frame, bg="#eef2f7")
+        card_container = tk.Frame(self.content_frame, bg="#e3edf7")
         card_container.pack(padx=10, pady=10, fill="x")
 
-<<<<<<< HEAD
-        for i, (title, value, color) in enumerate(stats):
-            row = i // 2
-            col = i % 2
+        
+        for col in range(len(stats)):
+            card_container.columnconfigure(col, weight=1)
 
-=======
-        for icon, title, value, color in stats:
->>>>>>> 7b155ad5d751785f76e13f0fc3b2fbda46b93686
+        for i, (icon, title, value, color) in enumerate(stats):
+            
             card = tk.Frame(
                 card_container,
                 bg="white",
@@ -113,7 +98,7 @@ class DashboardAdminWindow:
                 highlightthickness=2,
                 highlightbackground=color
             )
-            card.grid(row=row, column=col, padx=15, pady=15, sticky="nsew")
+            card.grid(row=0, column=i, padx=15, pady=15, sticky="nsew")
             card.grid_propagate(False)
 
             icon_label = tk.Label(
@@ -125,7 +110,7 @@ class DashboardAdminWindow:
             tk.Label(
                 card, text=title,
                 font=("Segoe UI", 13, "bold"),
-                bg="white", fg="#212121"
+                bg="white", fg="#2c3e50"
             ).pack()
 
             tk.Label(
@@ -134,11 +119,17 @@ class DashboardAdminWindow:
                 bg="white", fg=color
             ).pack(pady=(5, 0))
 
+
     def show_admin_profile(self):
         self.clear_content()
-        from .profile_admin import ProfileAdminWindow
-        profile_ui = ProfileAdminWindow(self.content_frame, self.user_data, None)
-        profile_ui.pack(fill="both", expand=True)
+        try:
+            from .profile_admin import ProfileAdminWindow
+            profile_ui = ProfileAdminWindow(self.content_frame, self.user_data, None)
+            profile_ui.pack(fill="both", expand=True)
+        except Exception as e:
+            tk.Label(self.content_frame, text="Failed to load Admin Profile.",
+                     font=("Segoe UI", 14), fg="red", bg="#e3edf7").pack(pady=20)
+            print("Error loading profile_admin:", e)
 
     def show_account_management(self):
         self.clear_content()
@@ -148,31 +139,29 @@ class DashboardAdminWindow:
 
     def show_vocabulary_management(self):
         self.clear_content()
-        from .vocabulary_management import VocabularyManagement
-        vocab_ui = VocabularyManagement(self.content_frame, self.user_data)
-        vocab_ui.pack(fill="both", expand=True)
+        try:
+            from .vocabulary_management import VocabularyManagement
+            vocab_ui = VocabularyManagement(self.content_frame, self.user_data)
+            vocab_ui.pack(fill="both", expand=True)
+        except Exception as e:
+            tk.Label(self.content_frame, text="Failed to load Vocabulary Management.",
+                     font=("Segoe UI", 14), fg="red", bg="#e3edf7").pack(pady=20)
+            print("Error loading vocabulary_management:", e)
 
     def view_stats(self):
         self.clear_content()
-
-<<<<<<< HEAD
-        stats_texts = [
-            f"- Tổng số người dùng: {self.count_user_accounts()}",
-            f"- Tổng số từ: {self.count_vocab()}",
-=======
         tk.Label(
             self.content_frame,
             text="📈 SYSTEM STATISTICS",
             font=("Segoe UI", 20, "bold"),
-            bg="#eef2f7",
-            fg="#212121"
+            bg="#e3edf7",
+            fg="#2c3e50"
         ).pack(anchor="w", pady=(0, 20), padx=10)
 
         stats = [
-            ("👥", "Total Users", self.count_users(), "#4caf50"),
-            ("📘", "Vocabulary Entries", self.count_vocab(), "#ff9800"),
-            ("🛡️", "Admin Accounts", self.count_admins(), "#f44336"),
->>>>>>> 7b155ad5d751785f76e13f0fc3b2fbda46b93686
+            ("👥", "Total Users", self.count_users(), "#27ae60"),
+            ("📚", "Vocabulary Entries", self.count_vocab(), "#e67e22"),
+            ("🛡️", "Admin Accounts", self.count_admins(), "#c0392b"),
         ]
 
         for icon, title, value, color in stats:
@@ -207,7 +196,7 @@ class DashboardAdminWindow:
                 text=title,
                 font=("Segoe UI", 14, "bold"),
                 bg="white",
-                fg="#212121"
+                fg="#2c3e50"
             ).pack(anchor="w")
 
             tk.Label(
@@ -237,28 +226,22 @@ class DashboardAdminWindow:
         with open(DB_PATH, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
 
-<<<<<<< HEAD
-    # --------------------- Count Functions ---------------------
-
     def count_user_accounts(self):
         try:
             with open(DB_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
-        
-        # First, check if the "users" key exists
             users = data.get("users", [])
-        
-        # Count users with role="User", and handle cases where role doesn't exist
-            user_count = sum(1 for u in users if u.get("role") == "User")
-        
-            return user_count
-        except Exception as e:
+            return sum(1 for u in users if u.get("role") == "User")
+        except:
             return 0
-=======
+
     def count_users(self):
         data = self.load_data()
         return len(data.get("users", []))
->>>>>>> 7b155ad5d751785f76e13f0fc3b2fbda46b93686
+
+    def count_admins(self):
+        data = self.load_data()
+        return sum(1 for u in data.get("users", []) if u.get("role") == "Admin")
 
     def count_vocab(self):
         data = self.load_data()

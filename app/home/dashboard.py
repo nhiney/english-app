@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
@@ -5,38 +6,38 @@ from PIL import Image, ImageTk
 from home.vocabulary_management import VocabularyManagement
 from common.configs import WINDOW_SIZE
 
-
 class DashboardWindow:
     def __init__(self, root, user):
         self.root = root
         self.user = user
         self.root.title("English Learning Dashboard")
 
-        # Center the window
+       
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
         x = int((screen_width / 2) - (WINDOW_SIZE['WIDTH'] / 2))
         y = int((screen_height / 2) - (WINDOW_SIZE['HEIGHT'] / 2))
         root.geometry(f"{WINDOW_SIZE['WIDTH']}x{WINDOW_SIZE['HEIGHT']}+{x}+{y}")
-        root.configure(bg="#F0F8FF")
+        root.configure(bg="#F0F9FF")
         root.resizable(False, False)
 
-        # Sidebar
-        self.sidebar = tk.Frame(root, bg="#1E40AF", width=260)
+        
+        self.sidebar = tk.Frame(root, bg="#1E3A8A", width=240)
         self.sidebar.pack(side="left", fill="y")
 
-        self.main_content = tk.Frame(root, bg="#F0F8FF", highlightbackground="#CBD5E1", highlightthickness=2)
+        
+        self.main_content = tk.Frame(root, bg="#F8FAFC")
         self.main_content.pack(side="right", fill="both", expand=True)
 
-        # Sidebar Header
+        
         tk.Label(
             self.sidebar,
             text=f"👤 {user.get('name', 'User')}",
-            bg="#1E40AF", fg="white",
-            font=("Helvetica", 16, "bold")
+            bg="#1E3A8A", fg="white",
+            font=("Segoe UI", 16, "bold")
         ).pack(pady=(30, 20))
 
-        # Sidebar menu
+        
         self.menu_items = [
             ("🏠 Dashboard", self.show_dashboard),
             ("📚 Vocabulary", self.show_vocabulary_management),
@@ -47,17 +48,15 @@ class DashboardWindow:
 
         for item in self.menu_items:
             if item:
-                btn = tk.Button(
-                    self.sidebar, text=item[0],
-                    fg="white", bg="#1E40AF",
-                    font=("Helvetica", 13, "bold"), anchor="w",
-                    relief="flat", padx=30, bd=0,
-                    activebackground="#3B82F6",
-                    activeforeground="white",
-                    command=item[1],
-                    cursor="hand2"
+                btn = tk.Label(
+                    self.sidebar, text=item[0], bg="#1E3A8A", fg="white",
+                    font=("Segoe UI", 13), anchor="w",
+                    padx=20, pady=12, cursor="hand2"
                 )
-                btn.pack(fill="x", pady=6, padx=10, ipady=6)
+                btn.pack(fill="x", padx=10, pady=4)
+                btn.bind("<Button-1>", lambda e, func=item[1]: func())
+                btn.bind("<Enter>", lambda e, b=btn: b.config(bg="#374EA2"))
+                btn.bind("<Leave>", lambda e, b=btn: b.config(bg="#1E3A8A"))
 
         self.show_dashboard()
 
@@ -68,37 +67,61 @@ class DashboardWindow:
     def show_dashboard(self):
         self.clear_main_frame()
 
+        
         tk.Label(
             self.main_content, text="📊 Learning Overview",
-            font=("Helvetica", 22, "bold"), bg="#F0F8FF", fg="#1E3A8A"
-        ).pack(pady=(30, 10))
+            font=("Segoe UI", 22, "bold"), bg="#F8FAFC", fg="#1D4ED8"
+        ).pack(pady=(10, 10))
 
         tk.Label(
             self.main_content, text=f"Welcome back, {self.user.get('name', '')} 👋",
-            font=("Helvetica", 14), bg="#F0F8FF", fg="#1E3A8A"
+            font=("Segoe UI", 14), bg="#F8FAFC", fg="#475569"
         ).pack()
 
-        stats_frame = tk.Frame(self.main_content, bg="#F0F8FF")
+        
+        stats_frame = tk.Frame(self.main_content, bg="#F8FAFC")
         stats_frame.pack(pady=30)
 
-        self.create_stat_box(stats_frame, "📝 Words Learned", 48, "#DBEAFE")
-        self.create_stat_box(stats_frame, "🎯 Today's Goal", "12 / 20", "#BFDBFE")
-        self.create_stat_box(stats_frame, "📅 Streak Days", 5, "#93C5FD")
-        self.create_stat_box(stats_frame, "⏱️ Study Time", "25 mins", "#60A5FA")
+        self.create_stat_box(stats_frame, "📝 Words Learned", 48, "#E0F2FE", 0, 0)
+        self.create_stat_box(stats_frame, "🎯 Today's Goal", "12 / 20", "#DBEAFE", 0, 1)
+        self.create_stat_box(stats_frame, "📅 Streak Days", 5, "#D1FAE5", 1, 0)
+        self.create_stat_box(stats_frame, "⏱️ Study Time", "25 mins", "#FDE68A", 1, 1)
 
-    def create_stat_box(self, parent, label, value, color):
-        box = tk.Frame(
-            parent,
-            bg=color,
-            bd=2,
-            highlightbackground="white",
-            highlightthickness=2,
-            relief="raised"
-        )
-        box.pack(side="left", padx=15, ipadx=30, ipady=25)
+    def create_stat_box(self, parent, label, value, color, row, column):
+        box = tk.Frame(parent, bg=color, bd=0, highlightbackground="#94A3B8", highlightthickness=1)
+        box.grid(row=row, column=column, padx=20, pady=15, ipadx=30, ipady=25, sticky="nsew")
 
-        tk.Label(box, text=label, bg=color, font=("Helvetica", 12, "bold"), fg="#1E3A8A").pack(pady=(0, 10))
-        tk.Label(box, text=str(value), bg=color, font=("Helvetica", 20, "bold"), fg="#1E3A8A").pack()
+        box.bind("<Enter>", lambda e, b=box: b.config(bg="#C7D2FE"))
+        box.bind("<Leave>", lambda e, b=box: b.config(bg=color))
+        box.bind("<Button-1>", lambda e, l=label: self.show_detail_popup(l))
+
+        tk.Label(box, text=label, bg=color, font=("Segoe UI", 12, "bold"), fg="#1E293B").pack(pady=(0, 10))
+        tk.Label(box, text=str(value), bg=color, font=("Segoe UI", 20, "bold"), fg="#0F172A").pack()
+
+        for child in box.winfo_children():
+            child.bind("<Button-1>", lambda e, l=label: self.show_detail_popup(l))
+
+    def show_detail_popup(self, label):
+        detail = {
+            "📝 Words Learned": "You have learned 48 words in total.\nKeep it up!",
+            "🎯 Today's Goal": "Your goal is 20 words today.\nYou've learned 12 so far.",
+            "📅 Streak Days": "You have a learning streak of 5 consecutive days!",
+            "⏱️ Study Time": "Total study time today: 25 minutes.\nTry to reach 30 minutes!"
+        }
+
+        top = tk.Toplevel(self.root)
+        top.title(label)
+        top.geometry("400x220")
+        top.configure(bg="#F9FAFB")
+        top.grab_set()
+
+        tk.Label(top, text=label, font=("Segoe UI", 16, "bold"), bg="#F9FAFB", fg="#1E3A8A").pack(pady=12)
+        tk.Label(top, text=detail.get(label, "No additional information."),
+                 bg="#F9FAFB", font=("Segoe UI", 12), wraplength=350, justify="left").pack(pady=10, padx=20)
+
+        tk.Button(top, text="Close", command=top.destroy,
+                  bg="#1E3A8A", fg="white", font=("Segoe UI", 11, "bold"),
+                  padx=10, pady=3, relief="flat", activebackground="#3B82F6").pack(pady=10)
 
     def show_vocabulary_management(self):
         self.clear_main_frame()
@@ -125,36 +148,3 @@ class DashboardWindow:
             new_root = tk.Tk()
             LoginWindow(new_root)
             new_root.mainloop()
-
-    def open_edit_profile_window(self):
-        top = tk.Toplevel(self.root)
-        top.title("Edit Profile")
-        top.geometry("400x300")
-        top.configure(bg="white")
-        top.grab_set()
-
-        tk.Label(top, text="Edit Profile", font=("Helvetica", 16, "bold"), bg="white", fg="#1E3A8A").pack(pady=10)
-
-        tk.Label(top, text="Full Name:", bg="white").pack(anchor="w", padx=20)
-        name_entry = tk.Entry(top)
-        name_entry.insert(0, self.user.get("name", ""))
-        name_entry.pack(padx=20, fill="x")
-
-        tk.Label(top, text="Email:", bg="white").pack(anchor="w", padx=20, pady=(10, 0))
-        email_entry = tk.Entry(top)
-        email_entry.insert(0, self.user.get("email", ""))
-        email_entry.pack(padx=20, fill="x")
-
-        def save_changes():
-            new_name = name_entry.get().strip()
-            new_email = email_entry.get().strip()
-            if new_name and new_email:
-                self.user["name"] = new_name
-                self.user["email"] = new_email
-                top.destroy()
-                self.show_dashboard()
-            else:
-                messagebox.showwarning("Warning", "Please fill in all fields.")
-
-        tk.Button(top, text="Save", command=save_changes, bg="#1E40AF", fg="white",
-                  font=("Helvetica", 12), padx=10).pack(pady=20)

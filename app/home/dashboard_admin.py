@@ -75,9 +75,9 @@ class DashboardAdminWindow:
         ).pack(anchor="w", pady=(0, 20), padx=10)
 
         stats = [
-            ("👥", "Total Users", self.count_user_accounts(), "#27ae60"),
+            ("👥", "Total Users", self.count_users(), "#27ae60"),
             ("📚", "Vocabulary Entries", self.count_vocab(), "#e67e22"),
-            ("🛡️", "Admin Accounts", self.count_admins(), "#c0392b")
+            ("🛡️", "Admin Accounts", self.count_admins(), "#c0392b"),
         ]
 
         card_container = tk.Frame(self.content_frame, bg="#e3edf7")
@@ -225,15 +225,6 @@ class DashboardAdminWindow:
     def save_data(self, data):
         with open(DB_PATH, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
-
-    def count_user_accounts(self):
-        try:
-            with open(DB_PATH, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            users = data.get("users", [])
-            return sum(1 for u in users if u.get("role") == "User")
-        except:
-            return 0
 
     def count_users(self):
         data = self.load_data()

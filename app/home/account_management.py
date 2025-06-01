@@ -265,8 +265,8 @@ class AccountDialog(tk.Toplevel):
         self.entry_email.place(x=pad_x, y=115)
 
         tk.Label(self, text="Role:", bg="#f5f7fa", font=font_label).place(x=pad_x, y=150)
-        self.role_var = tk.StringVar(value="user")
-        role_combo = ttk.Combobox(self, textvariable=self.role_var, values=["admin", "user"], state="readonly", font=font_entry, width=33)
+        self.role_var = tk.StringVar(value="User")
+        role_combo = ttk.Combobox(self, textvariable=self.role_var, values=["Admin", "User"], state="readonly", font=font_entry, width=33)
         role_combo.place(x=pad_x, y=175)
 
         
@@ -281,7 +281,7 @@ class AccountDialog(tk.Toplevel):
     def fill_data(self):
         self.name_var.set(self.user_data.get("name", ""))
         self.email_var.set(self.user_data.get("email", ""))
-        self.role_var.set(self.user_data.get("role", "user"))
+        self.role_var.set(self.user_data.get("role", "User"))
 
     def on_save(self):
         name = self.name_var.get().strip()

@@ -128,12 +128,6 @@ class DashboardWindow:
         vocab_ui = VocabularyManagement(self.main_content, self.user)
         vocab_ui.pack(fill="both", expand=True)
 
-    def show_user_management(self):
-        self.clear_main_frame()
-        from home.user_management import UserManagement
-        user_mgmt = UserManagement(self.main_content)
-        user_mgmt.pack(fill="both", expand=True)
-
     def show_profile(self):
         self.clear_main_frame()
         from home.profile_user import Profile

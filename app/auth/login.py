@@ -170,13 +170,13 @@ class LoginWindow(BaseWindow):
         for user in database.get("users", []):
             if user["email"] == email and user["password"] == hash_password(password):
                 role = user.get("role", "user")
-                if is_admin_login and role != "admin":
+                if is_admin_login and role != "Admin":
                     messagebox.showerror("Access Denied", "This account is not an admin!")
                     return
                 messagebox.showinfo("Welcome", f"Hello, {user.get('name', 'User')}!")
                 self.root.destroy()
                 new_root = tk.Tk()
-                if role == "admin":
+                if role == "Admin":
                     from home.dashboard_admin import DashboardAdminWindow
                     DashboardAdminWindow(new_root, user)
                 else:
